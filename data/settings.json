@@ -1,0 +1,30 @@
+{
+  "site_name": "Aluddin's Super Shop",
+  "site_description": "Baby Items",
+  "site_logo": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556330/southern-fashion-decor/logo/yek6aqmfx49pr6xcpu9s.png",
+  "hero_banner": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556345/southern-fashion-decor/hero/ifkmh5bmheuxwvcrul7i.png",
+  "contact_email": "jon@gmail.com",
+  "contact_phone": "+8801534207276",
+  "contact_address": "123 Fashion Street, Style City, Dhaka",
+  "business_hours": "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
+  "currency": "BDT",
+  "shipping_fee": "10.00",
+  "free_shipping_threshold": "100.00",
+  "tax_rate": "0.08",
+  "delivery_days": "3-5 business days",
+  "express_delivery_fee": "15.00",
+  "currency_symbol": "৳",
+  "primary_color": "#6cb1da",
+  "secondary_color": "#6cb1da",
+  "accent_color": "#06b6d4",
+  "reviews_enabled": true,
+  "wishlist_enabled": true,
+  "multi_language_enabled": true,
+  "newsletter_enabled": true,
+  "last_updated": "2025-08-07T08:45:53.352Z",
+  "generated_from_theme": true,
+  "hero_carousel": [
+    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556345/southern-fashion-decor/hero/ifkmh5bmheuxwvcrul7i.png",
+    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556350/southern-fashion-decor/hero/sm8upb49urloxl3j2gtm.jpg"
+  ]
+}

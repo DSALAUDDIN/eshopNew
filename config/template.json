@@ -1,0 +1,41 @@
+{
+  "projectName": "Alauddin",
+  "branding": {
+    "siteName": "Aluddin's Super Shop",
+    "siteDescription": "Baby Items",
+    "tagline": "Your trusted store",
+    "logo": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556330/southern-fashion-decor/logo/yek6aqmfx49pr6xcpu9s.png",
+    "hero_banner": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556345/southern-fashion-decor/hero/ifkmh5bmheuxwvcrul7i.png",
+    "hero_carousel": [
+      "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556345/southern-fashion-decor/hero/ifkmh5bmheuxwvcrul7i.png",
+      "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556350/southern-fashion-decor/hero/sm8upb49urloxl3j2gtm.jpg"
+    ]
+  },
+  "theme": {
+    "colors": {
+      "primary": "#6cb1da",
+      "secondary": "#6cb1da",
+      "accent": "#06b6d4"
+    },
+    "fonts": {
+      "heading": "Inter",
+      "body": "Inter",
+      "mono": "JetBrains Mono"
+    }
+  },
+  "features": {
+    "reviews": true,
+    "wishlist": true,
+    "multiLanguage": true,
+    "analytics": true,
+    "newsletter": true
+  },
+  "currency": {
+    "code": "BDT",
+    "symbol": "৳",
+    "position": "before"
+  },
+  "admin": {
+    "email": "jon@gmail.com"
+  }
+}
