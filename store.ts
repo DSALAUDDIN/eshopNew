@@ -190,8 +190,9 @@ export const useStore = create<StoreState>()(
             }
           })
           if (response.ok) {
-            const categories = await response.json()
-            set({ categories })
+            const data = await response.json()
+            console.log('Fetched categories:', data.categories, 'at', data.fetchedAt)
+            set({ categories: data.categories })
           }
         } catch (error) {
           console.error('Error fetching categories:', error)

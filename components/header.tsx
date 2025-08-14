@@ -17,6 +17,8 @@ interface HeaderProps {
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const router = useRouter()
   const { getCartItemCount, setCartOpen, searchQuery, setSearchQuery, categories, fetchCategories } = useStore()
+  // Log categories to debug UI updates
+  console.log('Header categories:', categories)
   const { settings, loading } = useSiteSettings()
   const [isHydrated, setIsHydrated] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
