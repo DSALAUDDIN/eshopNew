@@ -923,6 +923,13 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={fetchCategories}
+                    className="border-gray-300 shadow-sm"
+                  >
+                    Refresh Categories
+                  </Button>
                   <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
                     <DialogTrigger asChild>
                       <Button onClick={resetCategoryForm}>

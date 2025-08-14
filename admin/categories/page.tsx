@@ -350,134 +350,145 @@ export default function AdminCategories() {
 
   return (
       <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Categories Management</h1>
-          <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
-            <DialogTrigger asChild>
-              <Button
-                  onClick={() => {
-                    setEditingCategory(null)
-                    resetCategoryForm()
-                  }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Category
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingCategory ? 'Edit Category' : 'Add New Category'}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Category Name *</Label>
-                  <Input
-                      id="name"
-                      value={categoryForm.name}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                          setCategoryForm(prev => ({ ...prev, name: e.target.value }))
-                      }
-                      placeholder="Enter category name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                      id="description"
-                      value={categoryForm.description || ''}
-                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                          setCategoryForm(prev => ({
-                            ...prev,
-                            description: e.target.value,
-                          }))
-                      }
-                      placeholder="Enter category description"
-                      rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Category Image</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          const file = e.target.files?.[0]
-                          if (file) handleImageUpload(file, 'category')
-                        }}
-                        className="hidden"
-                        id="category-image-upload"
+        <div className="flex flex-row items-center justify-between w-full">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-3xl font-bold truncate">Categories Management</h1>
+          </div>
+          <div className="flex flex-row gap-2 flex-shrink-0 ml-4">
+            <Button
+              variant="outline"
+              onClick={fetchCategories}
+              className="border-gray-300 shadow-sm"
+            >
+              Refresh Categories
+            </Button>
+            <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+              <DialogTrigger asChild>
+                <Button
+                    onClick={() => {
+                      setEditingCategory(null)
+                      resetCategoryForm()
+                    }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Category
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingCategory ? 'Edit Category' : 'Add New Category'}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Category Name *</Label>
+                    <Input
+                        id="name"
+                        value={categoryForm.name}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            setCategoryForm(prev => ({ ...prev, name: e.target.value }))
+                        }
+                        placeholder="Enter category name"
                     />
-                    <label
-                        htmlFor="category-image-upload"
-                        className="cursor-pointer"
-                    >
-                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-gray-600">
-                        Click to upload category image
-                      </p>
-                    </label>
+                  </div>
 
-                    {categoryForm.image && (
-                        <div className="mt-4 relative inline-block">
-                          <img
-                              src={categoryForm.image}
-                              alt="Category Preview"
-                              className="w-32 h-32 object-cover rounded border"
-                          />
-                          <button
-                              type="button"
-                              onClick={() =>
-                                  setCategoryForm(prev => ({ ...prev, image: '' }))
-                              }
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                    )}
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                        id="description"
+                        value={categoryForm.description || ''}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                            setCategoryForm(prev => ({
+                              ...prev,
+                              description: e.target.value,
+                            }))
+                        }
+                        placeholder="Enter category description"
+                        rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Category Image</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleImageUpload(file, 'category')
+                          }}
+                          className="hidden"
+                          id="category-image-upload"
+                      />
+                      <label
+                          htmlFor="category-image-upload"
+                          className="cursor-pointer"
+                      >
+                        <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                        <p className="text-gray-600">
+                          Click to upload category image
+                        </p>
+                      </label>
+
+                      {categoryForm.image && (
+                          <div className="mt-4 relative inline-block">
+                            <img
+                                src={categoryForm.image}
+                                alt="Category Preview"
+                                className="w-32 h-32 object-cover rounded border"
+                            />
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setCategoryForm(prev => ({ ...prev, image: '' }))
+                                }
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                        id="isActive"
+                        checked={categoryForm.isActive}
+                        onCheckedChange={(checked: boolean) =>
+                            setCategoryForm(prev => ({ ...prev, isActive: checked }))
+                        }
+                    />
+                    <Label htmlFor="isActive">Active Category</Label>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowCategoryModal(false)
+                          setEditingCategory(null)
+                        }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                        onClick={
+                          editingCategory
+                              ? handleUpdateCategory
+                              : handleCreateCategory
+                        }
+                        disabled={!categoryForm.name || loading}
+                    >
+                      {editingCategory ? 'Update Category' : 'Create Category'}
+                    </Button>
                   </div>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                      id="isActive"
-                      checked={categoryForm.isActive}
-                      onCheckedChange={(checked: boolean) =>
-                          setCategoryForm(prev => ({ ...prev, isActive: checked }))
-                      }
-                  />
-                  <Label htmlFor="isActive">Active Category</Label>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowCategoryModal(false)
-                        setEditingCategory(null)
-                      }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                      onClick={
-                        editingCategory
-                            ? handleUpdateCategory
-                            : handleCreateCategory
-                      }
-                      disabled={!categoryForm.name || loading}
-                  >
-                    {editingCategory ? 'Update Category' : 'Create Category'}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Card>

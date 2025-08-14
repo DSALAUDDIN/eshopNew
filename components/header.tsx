@@ -84,6 +84,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   )
 
   return (
+    <>
       <header className="bg-[hsl(var(--primary))] text-white shadow-lg relative z-40">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between relative">
@@ -301,5 +302,16 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           )}
         </AnimatePresence>
       </header>
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fetchCategories()}
+          className="bg-white border border-gray-300 shadow-md hover:bg-orange-100 text-[hsl(var(--primary))] font-brandon"
+        >
+          Refresh Categories
+        </Button>
+      </div>
+    </>
   )
 }
