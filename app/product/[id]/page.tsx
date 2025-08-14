@@ -300,71 +300,71 @@ export default function ProductPage() {
                 )}
               </div>
 
-              {/* Add to Cart Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center border rounded-lg">
-                    <button
-                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                        className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                        aria-label="Decrease quantity"
-                        type="button"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="px-4 py-3 font-medium min-w-[60px] text-center">{quantity}</span>
-                    <button
-                        onClick={() => setQuantity(q => q + 1)}
-                        className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                        aria-label="Increase quantity"
-                        type="button"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+              {/*/!* Add to Cart Section *!/*/}
+              {/*<div className="space-y-6">*/}
+              {/*  <div className="flex items-center gap-4">*/}
+              {/*    <div className="flex items-center border rounded-lg">*/}
+              {/*      <button*/}
+              {/*          onClick={() => setQuantity(q => Math.max(1, q - 1))}*/}
+              {/*          className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"*/}
+              {/*          aria-label="Decrease quantity"*/}
+              {/*          type="button"*/}
+              {/*      >*/}
+              {/*        <Minus className="h-4 w-4" />*/}
+              {/*      </button>*/}
+              {/*      <span className="px-4 py-3 font-medium min-w-[60px] text-center">{quantity}</span>*/}
+              {/*      <button*/}
+              {/*          onClick={() => setQuantity(q => q + 1)}*/}
+              {/*          className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"*/}
+              {/*          aria-label="Increase quantity"*/}
+              {/*          type="button"*/}
+              {/*      >*/}
+              {/*        <Plus className="h-4 w-4" />*/}
+              {/*      </button>*/}
+              {/*    </div>*/}
 
-                  <Button
-                      onClick={handleAddToCart}
-                      disabled={!product.inStock}
-                      className="flex-1 h-12 text-lg"
-                      size="lg"
-                  >
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                  </Button>
-                </div>
+              {/*    <Button*/}
+              {/*        onClick={handleAddToCart}*/}
+              {/*        disabled={!product.inStock}*/}
+              {/*        className="flex-1 h-12 text-lg"*/}
+              {/*        size="lg"*/}
+              {/*    >*/}
+              {/*      <ShoppingCart className="h-5 w-5 mr-2" />*/}
+              {/*      {product.inStock ? 'Add to Cart' : 'Out of Stock'}*/}
+              {/*    </Button>*/}
+              {/*  </div>*/}
 
-                {product.stockQuantity && product.stockQuantity <= 10 && (
-                    <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">
-                      <span className="font-medium">⚠️ Only {product.stockQuantity} left in stock!</span>
-                    </div>
-                )}
-              </div>
+              {/*  {product.stockQuantity && product.stockQuantity <= 10 && (*/}
+              {/*      <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">*/}
+              {/*        <span className="font-medium">⚠️ Only {product.stockQuantity} left in stock!</span>*/}
+              {/*      </div>*/}
+              {/*  )}*/}
+              {/*</div>*/}
 
               {/* Features */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t">
-                <div className="flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  <Truck className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <div className="font-medium">Free Shipping</div>
-                    <div className="text-xs">On orders over $50</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <div>
-                    <div className="font-medium">Secure Payment</div>
-                    <div className="text-xs">SSL encrypted</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  <RotateCcw className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <div className="font-medium">Easy Returns</div>
-                    <div className="text-xs">30-day policy</div>
-                  </div>
-                </div>
-              </div>
+              {/*<div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t">*/}
+              {/*  <div className="flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">*/}
+              {/*    <Truck className="h-5 w-5 text-blue-600" />*/}
+              {/*    <div>*/}
+              {/*      <div className="font-medium">Free Shipping</div>*/}
+              {/*      <div className="text-xs">On orders over $50</div>*/}
+              {/*    </div>*/}
+              {/*  </div>*/}
+              {/*  <div className="flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">*/}
+              {/*    <Shield className="h-5 w-5 text-green-600" />*/}
+              {/*    <div>*/}
+              {/*      <div className="font-medium">Secure Payment</div>*/}
+              {/*      <div className="text-xs">SSL encrypted</div>*/}
+              {/*    </div>*/}
+              {/*  </div>*/}
+              {/*  <div className="flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">*/}
+              {/*    <RotateCcw className="h-5 w-5 text-purple-600" />*/}
+              {/*    <div>*/}
+              {/*      <div className="font-medium">Easy Returns</div>*/}
+              {/*      <div className="text-xs">30-day policy</div>*/}
+              {/*    </div>*/}
+              {/*  </div>*/}
+              {/*</div>*/}
             </div>
           </div>
 
@@ -373,7 +373,7 @@ export default function ProductPage() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="description">Description</TabsTrigger>
-                <TabsTrigger value="details">Specifications</TabsTrigger>
+                {/*<TabsTrigger value="details">Specifications</TabsTrigger>*/}
                 <TabsTrigger value="reviews">Reviews ({product.reviews?.length || 0})</TabsTrigger>
               </TabsList>
 
