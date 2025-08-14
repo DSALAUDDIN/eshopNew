@@ -1,12 +1,12 @@
 "use client"
 
-import { Search, Phone, Menu, X } from "lucide-react"
+import { Search, ShoppingCart, Phone, Menu } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useStore } from "@/lib/store"
 import { useRouter } from "next/navigation"
 import { useSiteSettings } from "@/lib/settings"
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 
 interface HeaderProps {
   isMobileMenuOpen: boolean
@@ -15,125 +15,153 @@ interface HeaderProps {
 
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const router = useRouter()
-  const { searchQuery, setSearchQuery, fetchCategories, categories } = useStore()
+  const { getCartItemCount, setCartOpen, searchQuery, setSearchQuery } = useStore()
   const { settings, loading } = useSiteSettings()
   const [isHydrated, setIsHydrated] = useState(false)
 
+  // Ensure hydration is complete before showing cart count
   useEffect(() => {
     setIsHydrated(true)
-    fetchCategories()
-  }, [fetchCategories])
+  }, [])
 
+  // Handle search functionality
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-      setIsMobileMenuOpen(false)
     }
   }
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+  }
+
+  // Type-safe settings access
   const settingsData = settings as any
 
+  // Debug log to see what settings we're getting
+  console.log('Header settings:', settings)
+
+  const cartCount = isHydrated ? getCartItemCount() : 0
+
   return (
-      <header className="bg-[#6ab4dc] text-white shadow relative z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-
-            {/* Logo + Shop Name (Left) */}
-            <div className="flex flex-col justify-center items-center text-center">
-              <button onClick={() => router.push("/")} aria-label="Go home">
-                {loading ? (
-                    <div className="animate-pulse">
-                      <div className="h-8 w-24 bg-white/20 rounded"></div>
-                    </div>
-                ) : settingsData?.site_logo ? (
-                    <img
-                        src={settingsData.site_logo}
-                        alt={settingsData.site_name || "Logo"}
-                        className="max-h-10 w-auto object-contain"
-                    />
-                ) : (
-                    <h1 className="text-2xl font-bold text-white">
-                      {settingsData?.site_name || "SFDBD"}
-                    </h1>
-                )}
-              </button>
-
-              {settingsData?.site_name && (
-                  <span className="text-xs text-orange-200 mt-1">
-                {settingsData.site_name.toLowerCase()}
-              </span>
-              )}
-            </div>
-
-            {/* Search Bar (Center for desktop) */}
-            <form
-                onSubmit={handleSearch}
-                className="hidden md:flex items-center bg-[#6ab4dc]"
+    <header className="bg-[hsl(var(--primary))] text-white shadow-lg">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-white hover:bg-[hsl(var(--primary))] font-brandon"
             >
-              <div className="relative w-[250px] md:w-[350px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
-                <Input
-                    placeholder="Enter keyword or product code"
-                    className="bg-white/20 border border-white/30 text-white placeholder:text-white/80 text-sm pl-10 font-brandon"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </form>
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
 
-            {/* Right side */}
-            <div className="flex items-center space-x-3">
-              {/* Contact (desktop only) */}
-              <div className="hidden md:flex items-center space-x-2">
-                <Phone className="w-4 h-4" />
-                <span>{settingsData?.contact_phone || "+8801534207276"}</span>
-              </div>
+          {/* Search - Hidden on mobile, shown on desktop */}
+          <form onSubmit={handleSearch} className="hidden md:flex items-center space-x-2 flex-1 max-w-xs">
+            <Search className="w-4 h-4" />
+            <Input
+              placeholder="Enter keyword or product code"
+              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-white/70 text-sm font-brandon"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </form>
 
-              {/* Mobile menu button */}
-              <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="md:hidden p-2"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
+          {/* Logo - Centered on mobile */}
+          <div className="text-center flex-1 md:flex-none">
+            <button onClick={() => router.push("/")} className="block">
+              {loading ? (
+                <div className="animate-pulse">
+                  <div className="h-8 w-24 bg-white/20 rounded"></div>
+                </div>
+              ) : settingsData?.site_logo &&
+                  settingsData.site_logo !== '/placeholder-logo.png' &&
+                  (settingsData.site_logo.startsWith('/uploads/') || settingsData.site_logo.startsWith('http')) ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={settingsData.site_logo}
+                    alt={settingsData.site_name || "Logo"}
+                    className="max-h-10 w-auto object-contain"
+                    onError={(e) => {
+                      console.error('Logo failed to load:', settingsData.site_logo)
+                      // Fallback to text logo if image fails
+                      const parent = e.currentTarget.parentElement
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg font-brandon">
+                              ${settingsData?.site_name || "SFDBD"}
+                            </h1>
+                            <p class="text-xs md:text-sm tracking-wider text-orange-200 font-brandon">trade</p>
+                          </div>
+                        `
+                      }
+                    }}
+                    onLoad={() => {
+                      console.log('✅ Logo loaded successfully:', settingsData.site_logo)
+                    }}
+                  />
+                  {settingsData?.site_name && (
+                    <p className="text-xs text-orange-200 font-brandon mt-1">
+                      {settingsData.site_name.toLowerCase()}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg font-brandon">
+                    {settingsData?.site_name || "SFDBD"}
+                  </h1>
+                  <p className="text-xs md:text-sm tracking-wider text-orange-200 font-brandon">trade</p>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center space-x-3">
+            {/* Contact - Hidden on mobile */}
+            <div className="hidden lg:flex items-center text-sm font-brandon">
+              <Phone className="w-4 h-4 mr-2" />
+              <span>{settingsData?.contact_phone || "+1 (555) 123-4567"}</span>
             </div>
+
+            {/* Cart */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCartOpen(true)}
+              className="relative text-white hover:bg-[hsl(var(--primary))] font-brandon"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
           </div>
         </div>
 
-        {/* Mobile Menu Drawer */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-              <motion.div
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ duration: 0.3 }}
-                  className="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50 overflow-y-auto"
-              >
-                <div className="flex items-center justify-between p-4 border-b">
-                  <span className="font-bold text-lg text-gray-800">Menu</span>
-                  <button onClick={() => setIsMobileMenuOpen(false)}>
-                    <X className="w-6 h-6 text-gray-600" />
-                  </button>
-                </div>
-                <nav className="p-4 space-y-2">
-                  {categories?.map((cat: any) => (
-                      <button
-                          key={cat.id}
-                          onClick={() => {
-                            router.push(`/category/${cat.slug}`)
-                            setIsMobileMenuOpen(false)
-                          }}
-                          className="block w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-gray-700"
-                      >
-                        {cat.name}
-                      </button>
-                  ))}
-                </nav>
-              </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+        {/* Mobile Search - Visible only on mobile */}
+        <div className="md:hidden mt-3">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
+            <Input
+              placeholder="Search products..."
+              className="bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-white/70 text-sm pl-10 font-brandon"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </form>
+        </div>
+      </div>
+    </header>
   )
 }
