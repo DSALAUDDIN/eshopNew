@@ -30,21 +30,21 @@ const sidebarItems = [
     href: '/admin/products',
     icon: Package
   },
-  {
-    title: 'Categories',
-    href: '/admin/categories',
-    icon: FolderTree
-  },
-  {
-    title: 'Orders',
-    href: '/admin/orders',
-    icon: ShoppingCart
-  },
-  {
-    title: 'Customers',
-    href: '/admin/customers',
-    icon: Users
-  },
+  // {
+  //   title: 'Categories',
+  //   href: '/admin/categories',
+  //   icon: FolderTree
+  // },
+  // {
+  //   title: 'Orders',
+  //   href: '/admin/orders',
+  //   icon: ShoppingCart
+  // },
+  // {
+  //   title: 'Customers',
+  //   href: '/admin/customers',
+  //   icon: Users
+  // },
   {
     title: 'Reviews',
     href: '/admin/reviews',
