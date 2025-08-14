@@ -24,6 +24,11 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   useEffect(() => {
     setIsHydrated(true)
     fetchCategories()
+    // Poll for category updates every 10 seconds
+    const interval = setInterval(() => {
+      fetchCategories()
+    }, 10000)
+    return () => clearInterval(interval)
   }, [fetchCategories])
 
   const handleSearch = (e?: React.FormEvent) => {
