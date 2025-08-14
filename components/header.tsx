@@ -154,6 +154,17 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                 <Phone className="w-4 h-4 mr-2" />
                 <span>{settingsData?.contact_phone || "+1 (555) 123-4567"}</span>
               </div>
+              {/* Refresh Categories Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={fetchCategories}
+                className="text-white hover:bg-[hsl(var(--primary))] font-brandon"
+                aria-label="Refresh categories"
+                title="Refresh categories"
+              >
+                &#x21bb; {/* Unicode clockwise arrow for refresh */}
+              </Button>
               {/* Cart */}
               <Button
                   variant="ghost"

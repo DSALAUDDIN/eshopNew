@@ -75,7 +75,14 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    return NextResponse.json(categoriesWithSubcategories)
+    return NextResponse.json(categoriesWithSubcategories, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      }
+    })
   } catch (error) {
     console.error('Error fetching categories:', error)
     return NextResponse.json(
