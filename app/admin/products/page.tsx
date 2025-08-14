@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,6 +58,7 @@ interface Subcategory {
 interface Product {
   id: string
   name: string
+  slug?: string
   description: string
   price: number
   originalPrice?: number
@@ -115,8 +116,8 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [filters, setFilters] = useState({ searchTerm: '', selectedCategory: '' })
+  const [appliedFilters, setAppliedFilters] = useState({ searchTerm: '', selectedCategory: '' })
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [showProductModal, setShowProductModal] = useState(false)
@@ -148,22 +149,15 @@ export default function AdminProducts() {
   const selectedCategoryObj = categories.find(cat => cat.id === productForm.categoryId)
   const availableSubcategories = selectedCategoryObj?.subcategories || []
 
-  useEffect(() => {
-    fetchProducts()
-  }, [currentPage, searchTerm, selectedCategory])
-
-  useEffect(() => {
-    fetchCategories()
-  }, [])
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    setLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '10',
-        search: searchTerm,
-        category: selectedCategory
+        search: appliedFilters.searchTerm,
+        category: appliedFilters.selectedCategory
       })
 
       const response = await fetch(`/api/admin/products?${params}`, {
@@ -182,6 +176,19 @@ export default function AdminProducts() {
     } finally {
       setLoading(false)
     }
+  }, [currentPage, appliedFilters])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const handleFilter = () => {
+    setCurrentPage(1)
+    setAppliedFilters(filters)
   }
 
   const fetchCategories = async () => {
@@ -330,10 +337,16 @@ export default function AdminProducts() {
         })
 
         if (response.ok) {
+          alert('Product deleted successfully!')
           fetchProducts()
+        } else {
+          const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+          alert(`Failed to delete product: ${errorData.error || 'Unknown server error'}`)
+          console.error('Error deleting product:', errorData)
         }
       } catch (error) {
         console.error('Error deleting product:', error)
+        alert('An error occurred while deleting the product.')
       }
     }
   }
@@ -707,13 +720,16 @@ export default function AdminProducts() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                       placeholder="Search products..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      value={filters.searchTerm}
+                      onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
                       className="pl-10"
                   />
                 </div>
               </div>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select 
+                value={filters.selectedCategory} 
+                onValueChange={(value) => setFilters(prev => ({ ...prev, selectedCategory: value }))}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -726,6 +742,7 @@ export default function AdminProducts() {
                   ))}
                 </SelectContent>
               </Select>
+              <Button onClick={handleFilter}>Filter</Button>
             </div>
           </CardContent>
         </Card>
@@ -795,7 +812,7 @@ export default function AdminProducts() {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
+                                <Button size="sm" variant="outline" onClick={() => window.open(`/product/${product.id}`, '_blank')}>
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 <Button size="sm" variant="outline" onClick={() => openEditModal(product)}>

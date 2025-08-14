@@ -1,8 +1,8 @@
 {
-  "site_name": "Aluddin's Super Shop",
+  "site_name": "SOUTHERN FASHION & DÉCOR BD.",
   "site_description": "Baby Items",
   "site_logo": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1755152288/southern-fashion-decor/logo/ckv7gbatc8jjudn3pl3h.jpg",
-  "hero_banner": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556345/southern-fashion-decor/hero/ifkmh5bmheuxwvcrul7i.png",
+  "hero_banner": "https://res.cloudinary.com/dyfswq8gl/image/upload/v1755166147/southern-fashion-decor/hero/ira8qwztz8iac5ulb4xc.jpg",
   "contact_email": "jon@gmail.com",
   "contact_phone": "+8801534207276",
   "contact_address": "123 Fashion Street, Style City, Dhaka",
@@ -21,10 +21,12 @@
   "wishlist_enabled": true,
   "multi_language_enabled": true,
   "newsletter_enabled": true,
-  "last_updated": "2025-08-14T06:18:17.185Z",
+  "last_updated": "2025-08-14T10:09:25.456Z",
   "generated_from_theme": true,
   "hero_carousel": [
-    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556345/southern-fashion-decor/hero/ifkmh5bmheuxwvcrul7i.png",
-    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1754556350/southern-fashion-decor/hero/sm8upb49urloxl3j2gtm.jpg"
+    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1755166147/southern-fashion-decor/hero/ira8qwztz8iac5ulb4xc.jpg",
+    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1755166150/southern-fashion-decor/hero/ygfa2nbanafy6let0lga.jpg",
+    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1755166154/southern-fashion-decor/hero/l9hhj7ltfls0wcrkpzkc.jpg",
+    "https://res.cloudinary.com/dyfswq8gl/image/upload/v1755166157/southern-fashion-decor/hero/zb3ftkl26a9msifhzuiv.jpg"
   ]
 }

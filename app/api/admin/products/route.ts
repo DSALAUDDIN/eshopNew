@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     if (search) conditions.push(like(products.name, `%${search}%`))
     if (status === 'active') conditions.push(eq(products.isActive, true))
     else if (status === 'inactive') conditions.push(eq(products.isActive, false))
-    if (category) conditions.push(eq(categories.slug, category))
+    if (category && category !== 'all') conditions.push(eq(products.categoryId, category))
 
     const productsData = await db
         .select({
@@ -70,13 +70,13 @@ export async function GET(request: NextRequest) {
         .limit(limit)
         .offset(offset)
 
-    const totalCount = await db
+    const totalCountResult = await db
         .select({ count: count() })
         .from(products)
         .leftJoin(categories, eq(products.categoryId, categories.id))
         .where(conditions.length > 0 ? and(...conditions) : undefined)
 
-    const total = totalCount[0]?.count || 0
+    const total = totalCountResult[0]?.count || 0
     const totalPages = Math.ceil(total / limit)
 
     const formattedProducts = productsData.map(item => ({

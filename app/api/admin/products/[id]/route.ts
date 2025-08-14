@@ -13,6 +13,22 @@ async function verifyAdmin(request: NextRequest) {
   return decoded
 }
 
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const id = params.id;
+    const product = await db.select().from(products).where(eq(products.id, id));
+
+    if (product.length === 0) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ product: product[0] });
+  } catch (error: any) {
+    console.error(`Error fetching product ${params.id}:`, error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await verifyAdmin(request)
@@ -68,5 +84,28 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       console.error('Error stack:', error.stack)
     }
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const user = await verifyAdmin(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const id = params.id;
+
+    const deleted = await db.delete(products).where(eq(products.id, id)).returning();
+
+    if (deleted.length === 0) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Product deleted successfully' });
+
+  } catch (error: any) {
+    console.error('Error deleting product:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
