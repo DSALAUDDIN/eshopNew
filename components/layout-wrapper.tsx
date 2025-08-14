@@ -42,12 +42,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
 
       {/* Global Components */}
       <CartSidebar />
-      {/* Debug panel for live category API debugging */}
-      {process.env.NODE_ENV !== 'production' || true ? (
-        <div style={{ zIndex: 99999 }}>
-          {require('./DebugCategories').default()}
-        </div>
-      ) : null}
+      {/* Removed <MobileMenu /> to avoid double mobile menu */}
     </div>
   )
 }

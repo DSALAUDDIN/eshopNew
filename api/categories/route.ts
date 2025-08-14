@@ -75,10 +75,7 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    return NextResponse.json({
-      categories: categoriesWithSubcategories,
-      fetchedAt: new Date().toISOString()
-    }, {
+    return NextResponse.json(categoriesWithSubcategories, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',

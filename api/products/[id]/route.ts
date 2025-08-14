@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma'
 import { products, categories, subcategories, reviews, users } from '@/lib/db/schema'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, ne } from 'drizzle-orm'
 
 // GET /api/products/[id] - Get single product for frontend
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -55,15 +55,36 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     ))
     .orderBy(desc(reviews.createdAt))
 
+    // Fetch related products
+    let relatedProductsData = [];
+    if (product.product.categoryId) {
+        relatedProductsData = await db.select()
+            .from(products)
+            .where(and(
+                eq(products.categoryId, product.product.categoryId),
+                ne(products.id, product.product.id),
+                eq(products.isActive, true)
+            ))
+            .limit(4)
+            .orderBy(desc(products.createdAt));
+    }
+
+    const formattedRelatedProducts = relatedProductsData.map(p => ({
+        ...p,
+        images: p.images ? JSON.parse(p.images) : []
+    }));
+
     // Format the response to match the expected structure
     const formattedProduct = {
       ...product.product,
+      images: product.product.images ? JSON.parse(product.product.images) : [],
       category: product.category,
       subcategory: product.subcategory,
       reviews: productReviews.map(r => ({
         ...r.review,
         user: r.user
-      }))
+      })),
+      relatedProducts: formattedRelatedProducts
     }
 
     return NextResponse.json(formattedProduct)

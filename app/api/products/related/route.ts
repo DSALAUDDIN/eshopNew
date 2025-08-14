@@ -1,74 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/prisma'
+import { products, categories, subcategories } from '@/lib/db/schema'
+import { eq, and, ne, desc } from 'drizzle-orm'
 
 // GET /api/products/related - Get related products by category
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category')
+    const categorySlug = searchParams.get('category')
     const excludeId = searchParams.get('excludeId')
     const limit = parseInt(searchParams.get('limit') || '8')
 
-    if (!category) {
+    if (!categorySlug) {
       return NextResponse.json({ error: 'Category is required' }, { status: 400 })
     }
 
-    const where: any = {
-      isActive: true,
-      inStock: true,
-      category: {
-        slug: category
-      }
-    }
+    const conditions = [
+      eq(products.isActive, true),
+      eq(products.inStock, true),
+      eq(categories.slug, categorySlug)
+    ]
 
     if (excludeId) {
-      where.id = {
-        not: parseInt(excludeId)
-      }
+      conditions.push(ne(products.id, excludeId))
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      include: {
+    const relatedProductsData = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        slug: products.slug,
+        description: products.description,
+        price: products.price,
+        originalPrice: products.originalPrice,
+        sku: products.sku,
+        images: products.images,
+        inStock: products.inStock,
+        stockQuantity: products.stockQuantity,
+        isNew: products.isNew,
+        isSale: products.isSale,
+        isFeatured: products.isFeatured,
+        isActive: products.isActive,
+        createdAt: products.createdAt,
         category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
+          id: categories.id,
+          name: categories.name,
+          slug: categories.slug
         },
         subcategory: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
-        },
-        images: {
-          select: {
-            id: true,
-            url: true,
-            alt: true,
-            isPrimary: true
-          }
-        },
-        reviews: {
-          select: {
-            id: true,
-            rating: true,
-            comment: true,
-            customerName: true,
-            createdAt: true
-          }
+          id: subcategories.id,
+          name: subcategories.name,
+          slug: subcategories.slug
         }
-      },
-      take: limit,
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(subcategories, eq(products.subcategoryId, subcategories.id))
+      .where(and(...conditions))
+      .orderBy(desc(products.createdAt))
+      .limit(limit)
 
-    return NextResponse.json(products)
+    const formattedProducts = relatedProductsData.map(product => ({
+      ...product,
+      images: product.images ? JSON.parse(product.images) : []
+    }))
+
+    return NextResponse.json(formattedProducts)
   } catch (error) {
     console.error('Error fetching related products:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
