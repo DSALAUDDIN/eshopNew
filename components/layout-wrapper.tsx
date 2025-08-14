@@ -7,7 +7,6 @@ import { Navigation } from "@/components/navigation"
 import { DeliveryBanner } from "@/components/delivery-banner"
 import { Footer } from "@/components/footer"
 import { CartSidebar } from "@/components/cart-sidebar"
-import { MobileMenu } from "@/components/mobile-menu"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -26,8 +25,10 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
           setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
 
-        {/* Navigation */}
-        <Navigation />
+        {/* Navigation - only show on md and up */}
+        <div className="hidden md:block">
+          <Navigation />
+        </div>
       </div>
 
       {/* Delivery Banner - Not sticky */}
@@ -41,10 +42,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
 
       {/* Global Components */}
       <CartSidebar />
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
+      {/* Removed <MobileMenu /> to avoid double mobile menu */}
     </div>
   )
 }

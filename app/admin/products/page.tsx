@@ -75,6 +75,7 @@ interface Product {
   careInstructions?: string
   seoTitle?: string
   seoDescription?: string
+  createdAt?: number // Add createdAt to Product interface
   images: string[]
 }
 
@@ -103,9 +104,9 @@ interface ProductForm {
 // SKU generation function
 const generateSKU = (productName: string): string => {
   const prefix = productName
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .substring(0, 3)
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .substring(0, 3)
   const timestamp = Date.now().toString().slice(-6)
   return `${prefix}-${timestamp}`
 }
@@ -262,14 +263,38 @@ export default function AdminProducts() {
   const handleUpdateProduct = async () => {
     try {
       const token = localStorage.getItem('adminToken')
-
+      // Prepare data for backend
+      const now = Math.floor(Date.now() / 1000)
+      const updateData = {
+        ...productForm,
+        images: JSON.stringify(productForm.images),
+        isNew: productForm.isNew ? 1 : 0,
+        isSale: productForm.isSale ? 1 : 0,
+        isFeatured: productForm.isFeatured ? 1 : 0,
+        isActive: productForm.isActive ? 1 : 0,
+        inStock: Number(productForm.stockQuantity) > 0 ? 1 : 0,
+        slug: productForm.name.toLowerCase().replace(/\s+/g, '-'), // Ensure slug is generated
+        updatedAt: now,
+        createdAt: editingProduct?.createdAt || now, // Ensure createdAt is always sent
+        // Only include fields that exist in the schema
+      }
+      // Only keep fields that are in the schema
+      const allowedFields = [
+        'name', 'slug', 'description', 'price', 'originalPrice', 'sku', 'images', 'inStock',
+        'stockQuantity', 'isNew', 'isSale', 'isFeatured', 'isActive', 'categoryId', 'subcategoryId',
+        'weight', 'dimensions', 'materials', 'careInstructions', 'seoTitle', 'seoDescription',
+        'createdAt', 'updatedAt'
+      ]
+      const filteredUpdateData = Object.fromEntries(
+          Object.entries(updateData).filter(([key]) => allowedFields.includes(key))
+      )
       const response = await fetch(`/api/admin/products/${editingProduct?.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(productForm)
+        body: JSON.stringify(filteredUpdateData)
       })
 
       if (response.ok) {
@@ -405,417 +430,417 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Products Management</h1>
-        <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
-              </DialogTitle>
-            </DialogHeader>
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Products Management</h1>
+          <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingProduct ? 'Edit Product' : 'Add New Product'}
+                </DialogTitle>
+              </DialogHeader>
 
-            <div className="space-y-6">
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Product Name *</Label>
-                  <Input
-                    id="name"
-                    value={productForm.name}
-                    onChange={(e) => setProductForm(prev => ({...prev, name: e.target.value}))}
-                    placeholder="Enter product name"
-                  />
-                </div>
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Product Name *</Label>
+                    <Input
+                        id="name"
+                        value={productForm.name}
+                        onChange={(e) => setProductForm(prev => ({...prev, name: e.target.value}))}
+                        placeholder="Enter product name"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={productForm.categoryId}
-                    onValueChange={(value) => setProductForm(prev => ({
-                      ...prev,
-                      categoryId: value,
-                      subcategoryId: '' // Reset subcategory when category changes
-                    }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Subcategory Selection - Only show if category is selected */}
-                {productForm.categoryId && availableSubcategories.length > 0 && (
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="subcategory">Subcategory</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category *</Label>
                     <Select
-                      value={productForm.subcategoryId}
-                      onValueChange={(value) => setProductForm(prev => ({...prev, subcategoryId: value === 'none' ? '' : value}))}
+                        value={productForm.categoryId}
+                        onValueChange={(value) => setProductForm(prev => ({
+                          ...prev,
+                          categoryId: value,
+                          subcategoryId: '' // Reset subcategory when category changes
+                        }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select subcategory (optional)" />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">No subcategory</SelectItem>
-                        {availableSubcategories.map((subcategory) => (
-                          <SelectItem key={subcategory.id} value={subcategory.id}>
-                            {subcategory.name}
-                          </SelectItem>
+                        {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-sm text-gray-500">
-                      Available subcategories for {selectedCategoryObj?.name}: {availableSubcategories.length}
+                  </div>
+
+                  {/* Subcategory Selection - Only show if category is selected */}
+                  {productForm.categoryId && availableSubcategories.length > 0 && (
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="subcategory">Subcategory</Label>
+                        <Select
+                            value={productForm.subcategoryId}
+                            onValueChange={(value) => setProductForm(prev => ({...prev, subcategoryId: value === 'none' ? '' : value}))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select subcategory (optional)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No subcategory</SelectItem>
+                            {availableSubcategories.map((subcategory) => (
+                                <SelectItem key={subcategory.id} value={subcategory.id}>
+                                  {subcategory.name}
+                                </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-sm text-gray-500">
+                          Available subcategories for {selectedCategoryObj?.name}: {availableSubcategories.length}
+                        </p>
+                      </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Price *</Label>
+                    <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        value={productForm.price}
+                        onChange={(e) => setProductForm(prev => ({...prev, price: e.target.value}))}
+                        placeholder="0.00"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="originalPrice">Original Price</Label>
+                    <Input
+                        id="originalPrice"
+                        type="number"
+                        step="0.01"
+                        value={productForm.originalPrice}
+                        onChange={(e) => setProductForm(prev => ({...prev, originalPrice: e.target.value}))}
+                        placeholder="0.00"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="stockQuantity">Stock Quantity *</Label>
+                    <Input
+                        id="stockQuantity"
+                        type="number"
+                        value={productForm.stockQuantity}
+                        onChange={(e) => setProductForm(prev => ({...prev, stockQuantity: e.target.value}))}
+                        placeholder="0"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="sku">SKU *</Label>
+                    <div className="flex gap-2">
+                      <Input
+                          id="sku"
+                          value={productForm.sku}
+                          onChange={(e) => setProductForm(prev => ({...prev, sku: e.target.value}))}
+                          placeholder="Auto-generated or enter custom SKU"
+                      />
+                      <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (productForm.name) {
+                              const newSku = generateSKU(productForm.name)
+                              setProductForm(prev => ({...prev, sku: newSku}))
+                            } else {
+                              alert('Please enter a product name first')
+                            }
+                          }}
+                          title="Generate SKU from product name"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      SKU will be auto-generated when creating the product if left empty
                     </p>
                   </div>
-                )}
+                </div>
 
+                {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={productForm.price}
-                    onChange={(e) => setProductForm(prev => ({...prev, price: e.target.value}))}
-                    placeholder="0.00"
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                      id="description"
+                      value={productForm.description}
+                      onChange={(e) => setProductForm(prev => ({...prev, description: e.target.value}))}
+                      placeholder="Enter product description"
+                      rows={4}
                   />
                 </div>
 
+                {/* Images */}
                 <div className="space-y-2">
-                  <Label htmlFor="originalPrice">Original Price</Label>
-                  <Input
-                    id="originalPrice"
-                    type="number"
-                    step="0.01"
-                    value={productForm.originalPrice}
-                    onChange={(e) => setProductForm(prev => ({...prev, originalPrice: e.target.value}))}
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="stockQuantity">Stock Quantity *</Label>
-                  <Input
-                    id="stockQuantity"
-                    type="number"
-                    value={productForm.stockQuantity}
-                    onChange={(e) => setProductForm(prev => ({...prev, stockQuantity: e.target.value}))}
-                    placeholder="0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="sku">SKU *</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="sku"
-                      value={productForm.sku}
-                      onChange={(e) => setProductForm(prev => ({...prev, sku: e.target.value}))}
-                      placeholder="Auto-generated or enter custom SKU"
+                  <Label>Product Images</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleImageUpload(file)
+                        }}
+                        className="hidden"
+                        id="image-upload"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (productForm.name) {
-                          const newSku = generateSKU(productForm.name)
-                          setProductForm(prev => ({...prev, sku: newSku}))
-                        } else {
-                          alert('Please enter a product name first')
-                        }
-                      }}
-                      title="Generate SKU from product name"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <div className="text-center">
+                        <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                        <p className="text-gray-600">Click to upload images</p>
+                      </div>
+                    </label>
+
+                    {productForm.images.length > 0 && (
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                          {productForm.images.map((image, index) => (
+                              <div key={index} className="relative">
+                                <img
+                                    src={image}
+                                    alt={`Product ${index + 1}`}
+                                    className="w-full h-20 object-cover rounded"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeImage(index)}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                          ))}
+                        </div>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500">
-                    SKU will be auto-generated when creating the product if left empty
-                  </p>
+                </div>
+
+                {/* Product Flags */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                        id="isNew"
+                        checked={productForm.isNew}
+                        onCheckedChange={(checked) => setProductForm(prev => ({...prev, isNew: checked}))}
+                    />
+                    <Label htmlFor="isNew">New Product</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                        id="isSale"
+                        checked={productForm.isSale}
+                        onCheckedChange={(checked) => setProductForm(prev => ({...prev, isSale: checked}))}
+                    />
+                    <Label htmlFor="isSale">On Sale</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                        id="isFeatured"
+                        checked={productForm.isFeatured}
+                        onCheckedChange={(checked) => setProductForm(prev => ({...prev, isFeatured: checked}))}
+                    />
+                    <Label htmlFor="isFeatured">Featured</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                        id="isActive"
+                        checked={productForm.isActive}
+                        onCheckedChange={(checked) => setProductForm(prev => ({...prev, isActive: checked}))}
+                    />
+                    <Label htmlFor="isActive">Active</Label>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-2">
+                  <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowProductModal(false)
+                        setEditingProduct(null)
+                        resetForm()
+                      }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                      onClick={editingProduct ? handleUpdateProduct : handleCreateProduct}
+                      disabled={!productForm.name || !productForm.description || !productForm.price || !productForm.categoryId}
+                  >
+                    {editingProduct ? 'Update Product' : 'Create Product'}
+                  </Button>
                 </div>
               </div>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  value={productForm.description}
-                  onChange={(e) => setProductForm(prev => ({...prev, description: e.target.value}))}
-                  placeholder="Enter product description"
-                  rows={4}
-                />
-              </div>
-
-              {/* Images */}
-              <div className="space-y-2">
-                <Label>Product Images</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleImageUpload(file)
-                    }}
-                    className="hidden"
-                    id="image-upload"
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                      placeholder="Search products..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
                   />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <div className="text-center">
-                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-gray-600">Click to upload images</p>
-                    </div>
-                  </label>
-
-                  {productForm.images.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2 mt-4">
-                      {productForm.images.map((image, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={image}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-20 object-cover rounded"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
-
-              {/* Product Flags */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isNew"
-                    checked={productForm.isNew}
-                    onCheckedChange={(checked) => setProductForm(prev => ({...prev, isNew: checked}))}
-                  />
-                  <Label htmlFor="isNew">New Product</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isSale"
-                    checked={productForm.isSale}
-                    onCheckedChange={(checked) => setProductForm(prev => ({...prev, isSale: checked}))}
-                  />
-                  <Label htmlFor="isSale">On Sale</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isFeatured"
-                    checked={productForm.isFeatured}
-                    onCheckedChange={(checked) => setProductForm(prev => ({...prev, isFeatured: checked}))}
-                  />
-                  <Label htmlFor="isFeatured">Featured</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={productForm.isActive}
-                    onCheckedChange={(checked) => setProductForm(prev => ({...prev, isActive: checked}))}
-                  />
-                  <Label htmlFor="isActive">Active</Label>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowProductModal(false)
-                    setEditingProduct(null)
-                    resetForm()
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={editingProduct ? handleUpdateProduct : handleCreateProduct}
-                  disabled={!productForm.name || !productForm.description || !productForm.price || !productForm.categoryId}
-                >
-                  {editingProduct ? 'Update Product' : 'Create Product'}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Products ({products.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Loading products...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map((product: any) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {product.images?.[0] && (
-                            <img
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                          )}
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-gray-500">SKU: {product.sku}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{product.category?.name}</TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{formatCurrency(product.price)}</p>
-                          {product.originalPrice && (
-                            <p className="text-sm text-gray-500 line-through">
-                              {formatCurrency(product.originalPrice)}
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={product.stockQuantity <= 10 ? "destructive" : "secondary"}>
-                          {product.stockQuantity}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          {product.isActive && <Badge variant="secondary">Active</Badge>}
-                          {product.isNew && <Badge>New</Badge>}
-                          {product.isSale && <Badge variant="destructive">Sale</Badge>}
-                          {product.isFeatured && <Badge variant="outline">Featured</Badge>}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => openEditModal(product)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteProduct(product.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
                   ))}
-                </TableBody>
-              </Table>
+                </SelectContent>
+              </Select>
             </div>
-          )}
+          </CardContent>
+        </Card>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => prev - 1)}
-              >
-                Previous
-              </Button>
-              <span className="px-4 py-2">
+        {/* Products Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Products ({products.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+                <div className="text-center py-8">Loading products...</div>
+            ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products.map((product: any) => (
+                          <TableRow key={product.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                {product.images?.[0] && (
+                                    <img
+                                        src={product.images[0]}
+                                        alt={product.name}
+                                        className="w-12 h-12 object-cover rounded"
+                                    />
+                                )}
+                                <div>
+                                  <p className="font-medium">{product.name}</p>
+                                  <p className="text-sm text-gray-500">SKU: {product.sku}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{product.category?.name}</TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{formatCurrency(product.price)}</p>
+                                {product.originalPrice && (
+                                    <p className="text-sm text-gray-500 line-through">
+                                      {formatCurrency(product.originalPrice)}
+                                    </p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={product.stockQuantity <= 10 ? "destructive" : "secondary"}>
+                                {product.stockQuantity}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                {product.isActive && <Badge variant="secondary">Active</Badge>}
+                                {product.isNew && <Badge>New</Badge>}
+                                {product.isSale && <Badge variant="destructive">Sale</Badge>}
+                                {product.isFeatured && <Badge variant="outline">Featured</Badge>}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => openEditModal(product)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDeleteProduct(product.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                  <Button
+                      variant="outline"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => prev - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="px-4 py-2">
                 Page {currentPage} of {totalPages}
               </span>
-              <Button
-                variant="outline"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                  <Button
+                      variant="outline"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(prev => prev + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
   )
 }

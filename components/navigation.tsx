@@ -69,7 +69,7 @@ export function Navigation() {
             {/* Navbar */}
             <div className="w-full">
                 <div className="flex justify-center space-x-8 py-4">
-                    {categories.map((category) => {
+                    {categories.filter((cat, idx, arr) => arr.findIndex(c => c.name === cat.name) === idx).map((category) => {
                         const isOpen = openCategory === category.id;
                         return (
                             <div
@@ -103,7 +103,7 @@ export function Navigation() {
                                             {/* Subcategories grid */}
                                             <div className="flex-1 flex flex-col justify-center h-full">
                                                 <div className="grid grid-cols-3 gap-x-10 gap-y-2">
-                                                    {category.subcategories.map((subcategory: any) => (
+                                                    {category.subcategories.filter((sub, idx, arr) => arr.findIndex(s => s.name === sub.name) === idx).map((subcategory: any) => (
                                                         <button
                                                             key={subcategory.id}
                                                             onClick={() => router.push(`/category/${category.slug}?subcategory=${subcategory.slug}`)}

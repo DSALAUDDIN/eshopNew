@@ -6,7 +6,7 @@ export interface Product {
   image: string
   images?: string[]
   category: string
-  subcategory: string
+  subcategory: string | { slug: string; name?: string; [key: string]: any }
   isNew: boolean
   isSale: boolean
   isFeatured?: boolean
