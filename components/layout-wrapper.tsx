@@ -7,6 +7,7 @@ import { Navigation } from "@/components/navigation"
 import { DeliveryBanner } from "@/components/delivery-banner"
 import { Footer } from "@/components/footer"
 import { CartSidebar } from "@/components/cart-sidebar"
+import { MobileMenu } from "@/mobile-menu"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -42,7 +43,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
 
       {/* Global Components */}
       <CartSidebar />
-      {/* Removed <MobileMenu /> to avoid double mobile menu */}
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </div>
   )
 }
