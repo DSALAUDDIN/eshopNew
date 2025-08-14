@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Phone } from "lucide-react"
+import { Search, Phone, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useStore } from "@/lib/store"
@@ -42,19 +42,30 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
       <header className="bg-[#6ab4dc] text-white shadow relative z-40">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              {/* Hamburger Menu (Mobile) */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden mr-2"
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
 
-            {/* Search Bar (Left) */}
-            <form onSubmit={handleSearch} className="flex items-center bg-[#6ab4dc]">
-              <div className="relative w-[250px] md:w-[350px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
-                <Input
-                    placeholder="Enter keyword or product code"
-                    className="bg-white/20 border border-white/30 text-white placeholder:text-white/80 text-sm pl-10 font-brandon"
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                />
-              </div>
-            </form>
+              {/* Search Bar (Left) */}
+              <form onSubmit={handleSearch} className="flex items-center bg-[#6ab4dc]">
+                <div className="relative w-[250px] md:w-[350px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
+                  <Input
+                      placeholder="Enter keyword or product code"
+                      className="bg-white/20 border border-white/30 text-white placeholder:text-white/80 text-sm pl-10 font-brandon"
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                </div>
+              </form>
+            </div>
 
             {/* Logo + Shop Name (Center) */}
             <div className="flex flex-col justify-center items-center text-center">
@@ -101,7 +112,3 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
       </header>
   )
 }
-
-
-
-
