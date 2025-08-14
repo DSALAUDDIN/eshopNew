@@ -135,6 +135,5 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           )}
         </AnimatePresence>
       </header>
-      // ?
   )
 }
