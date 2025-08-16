@@ -52,9 +52,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
         <header className="bg-[#6cb2da] text-white z-50 sticky top-0 shadow-md" onMouseLeave={() => setActiveMenu(null)}>
           {/* === TOP BAR SECTION === */}
           <div className="border-b border-gray-200/30">
-            <div className="bg-[#559ac8] text-white text-center py-2 text-sm font-semibold">
-              FREE UK DELIVERY OVER £200 / 200€ / $200
-            </div>
+
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between gap-4 py-4">
                 {/* Left: Logo & Mobile Menu */}
