@@ -1,12 +1,12 @@
 "use client"
 
-import { Search, Phone, Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Search, User, ShoppingBag, Phone, Menu, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { useStore } from "@/lib/store"
+import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useSiteSettings } from "@/lib/settings"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface HeaderProps {
   isMobileMenuOpen: boolean
@@ -15,14 +15,29 @@ interface HeaderProps {
 
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const router = useRouter()
-  const { searchQuery, setSearchQuery, fetchCategories } = useStore()
+  const [searchQuery, setSearchQuery] = useState("")
   const { settings, loading } = useSiteSettings()
-  const [isHydrated, setIsHydrated] = useState(false)
+
+  const [activeMenu, setActiveMenu] = useState<any | null>(null)
+  const [categories, setCategories] = useState<any[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
 
   useEffect(() => {
-    setIsHydrated(true)
+    const fetchCategories = async () => {
+      setCategoriesLoading(true)
+      try {
+        const response = await fetch("/api/categories")
+        if (!response.ok) throw new Error("Network response was not ok")
+        const data = await response.json()
+        setCategories(data)
+      } catch (error) {
+        console.error("Failed to fetch categories:", error)
+      } finally {
+        setCategoriesLoading(false)
+      }
+    }
     fetchCategories()
-  }, [fetchCategories])
+  }, [])
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -32,83 +47,146 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
     }
   }
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value)
-  }
-
-  const settingsData = settings as any
-
   return (
-      <header className="bg-[#6ab4dc] text-white shadow relative z-40">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              {/* Hamburger Menu (Mobile) */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden mr-2"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </Button>
-
-              {/* Search Bar (Left) */}
-              <form onSubmit={handleSearch} className="flex items-center bg-[#6ab4dc]">
-                <div className="relative w-[250px] md:w-[350px]">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
-                  <Input
-                      placeholder="Enter keyword or product code"
-                      className="bg-white/20 border border-white/30 text-white placeholder:text-white/80 text-sm pl-10 font-brandon"
-                      value={searchQuery}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                  />
+      <>
+        <header className="bg-[#6cb2da] text-white z-50 sticky top-0 shadow-md" onMouseLeave={() => setActiveMenu(null)}>
+          {/* === TOP BAR SECTION === */}
+          <div className="border-b border-gray-200/30">
+            <div className="bg-[#559ac8] text-white text-center py-2 text-sm font-semibold">
+              FREE UK DELIVERY OVER £200 / 200€ / $200
+            </div>
+            <div className="container mx-auto px-4">
+              <div className="flex items-center justify-between gap-4 py-4">
+                {/* Left: Logo & Mobile Menu */}
+                <div className="flex items-center gap-4">
+                  <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/20" onClick={() => setIsMobileMenuOpen(true)}>
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                  <button onClick={() => router.push("/")} aria-label="Go home">
+                    {loading ? (
+                      <div className="h-10 w-40 animate-pulse rounded-md bg-white/30"></div>
+                    ) : (
+                      settings && (
+                        <img src={settings.site_logo} alt={settings.site_name || 'Site Logo'} className="h-10 object-contain" />
+                      )
+                    )}
+                  </button>
                 </div>
-              </form>
-            </div>
 
-            {/* Logo + Shop Name (Center) */}
-            <div className="flex flex-col justify-center items-center text-center">
-              <button onClick={() => router.push("/")} aria-label="Go home">
-                {loading ? (
-                    <div className="animate-pulse">
-                      <div className="h-8 w-24 bg-white/20 rounded"></div>
-                    </div>
-                ) : settingsData?.site_logo &&
-                settingsData.site_logo !== '/placeholder-logo.png' &&
-                (settingsData.site_logo.startsWith('/uploads/') || settingsData.site_logo.startsWith('http')) ? (
-                    <img
-                        src={settingsData.site_logo}
-                        alt={settingsData.site_name || "Logo"}
-                        className="max-h-10 w-auto object-contain"
+                {/* Center: Search Bar (Desktop) */}
+                <div className="hidden md:flex flex-1 justify-center px-8">
+                  <form onSubmit={handleSearch} className="relative w-full max-w-lg">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Input 
+                      placeholder="Enter keyword or product code" 
+                      className="bg-white border-gray-300 text-sm pl-11 py-2 w-full focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800" 
+                      value={searchQuery} 
+                      onChange={e => setSearchQuery(e.target.value)} 
                     />
-                ) : (
-                    <h1 className="text-2xl font-bold text-white">
-                      {settingsData?.site_name || "SFDBD"}
-                    </h1>
-                )}
-              </button>
+                  </form>
+                </div>
 
-              {settingsData?.site_name && (
-                  <span className="text-xs text-orange-200 mt-1">
-                {settingsData.site_name.toLowerCase()}
-              </span>
-              )}
+                {/* Right: Icons */}
+                <div className="flex items-center justify-end space-x-4 text-sm">
+                  <a href="#" className="hidden lg:flex items-center gap-2 hover:text-gray-200"><User size={20} /> Login to TRADE</a>
+                  <a href="#" className="flex items-center gap-2 hover:text-gray-200"><ShoppingBag size={20} /> £0.00</a>
+                  {settings && settings.contact_phone && (
+                    <a href={`tel:${settings.contact_phone}`} className="hidden lg:flex items-center gap-2 hover:text-gray-200">
+                      <Phone size={20} /> {settings.contact_phone}
+                    </a>
+                  )}
+                </div>
+              </div>
+              {/* Mobile Search Bar */}
+              <div className="md:hidden pb-4">
+                <form onSubmit={handleSearch} className="relative w-full">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input 
+                    placeholder="Enter keyword or product code" 
+                    className="bg-white border-gray-300 text-sm pl-11 py-2 w-full focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800" 
+                    value={searchQuery} 
+                    onChange={e => setSearchQuery(e.target.value)} 
+                  />
+                </form>
+              </div>
             </div>
-
-            {/* Contact (Right) */}
-            <div className="hidden md:flex items-center space-x-3">
-              <Phone className="w-4 h-4" />
-              <span>{settingsData?.contact_phone || "+8801534207276"}</span>
-            </div>
-
-            {/* Commented out cart and refresh buttons */}
-            {/*
-          <Button>Refresh Categories</Button>
-          <Button>Cart</Button>
-          */}
           </div>
-        </div>
-      </header>
+
+          {/* === NAVIGATION SECTION === */}
+          <div className="hidden md:block bg-[#6cb2da] relative">
+            <nav className="container mx-auto flex justify-center items-center gap-x-8 h-[48px]">
+               {categoriesLoading ? (
+                <div className="flex items-center justify-center gap-x-8">
+                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
+                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
+                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
+                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
+                </div>
+              ) : (
+                categories.map((cat: any) => (
+                    <div key={cat.id} className="py-3" onMouseEnter={() => setActiveMenu(cat)}>
+                      <button onClick={() => router.push(`/category/${cat.slug}`)} className="text-sm font-bold tracking-wider uppercase text-white hover:text-gray-200 transition-colors">
+                        {cat.name}
+                      </button>
+                    </div>
+                ))
+              )}
+            </nav>
+            
+            {/* MEGA MENU CONTAINER */}
+            <AnimatePresence>
+              {activeMenu && (
+                  <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute w-full z-50 left-0 top-full"
+                  >
+                    <div className="bg-white shadow-lg text-gray-800" onMouseEnter={() => setActiveMenu(activeMenu)} onMouseLeave={() => setActiveMenu(null)}>
+                      <div className="container mx-auto p-8 flex justify-between gap-8">
+                        <div className="flex-1">
+                          {activeMenu.subcategories && activeMenu.subcategories.length > 0 && (
+                              <ul className="columns-4 gap-x-8">
+                                {activeMenu.subcategories.map((subcat: any) => (
+                                    <li key={subcat.id} className="mb-2 break-inside-avoid-column">
+                                      <a href={`/category/${subcat.slug}`} className="text-gray-600 hover:text-teal-600 text-sm block">{subcat.name}</a>
+                                    </li>
+                                ))}
+                              </ul>
+                          )}
+                        </div>
+                        {activeMenu.image && (
+                            <a href="#" className="w-1/5 flex-shrink-0 text-center group">
+                              <div className="bg-gray-100 overflow-hidden mb-2">
+                                <img src={activeMenu.image} alt={activeMenu.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              </div>
+                              <span className="font-bold text-gray-800 uppercase text-sm tracking-wider group-hover:text-teal-600">{activeMenu.imageTitle}</span>
+                            </a>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </header>
+
+        {/* OVERLAY for Mega Menu */}
+        <AnimatePresence>
+            {activeMenu && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed inset-0 bg-black bg-opacity-30 z-40"
+                    onClick={() => setActiveMenu(null)}
+                />
+            )}
+        </AnimatePresence>
+
+        {/* Your Mobile Menu Drawer would go here */}
+      </>
   )
 }

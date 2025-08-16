@@ -288,17 +288,17 @@ export default function ProductPage() {
               </div>
 
               {/* Price */}
-              <div className="flex items-center gap-4 pb-6 border-b">
-                <span className="text-4xl font-bold text-gray-900">{formatPrice(product.price)}</span>
-                {product.originalPrice && (
-                    <>
-                      <span className="text-xl text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
-                      <Badge variant="destructive" className="text-sm">
-                        Save {safePercent(product.originalPrice - product.price, product.originalPrice)}%
-                      </Badge>
-                    </>
-                )}
-              </div>
+              {/*<div className="flex items-center gap-4 pb-6 border-b">*/}
+              {/*  <span className="text-4xl font-bold text-gray-900">{formatPrice(product.price)}</span>*/}
+              {/*  {product.originalPrice && (*/}
+              {/*      <>*/}
+              {/*        <span className="text-xl text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>*/}
+              {/*        <Badge variant="destructive" className="text-sm">*/}
+              {/*          Save {safePercent(product.originalPrice - product.price, product.originalPrice)}%*/}
+              {/*        </Badge>*/}
+              {/*      </>*/}
+              {/*  )}*/}
+              {/*</div>*/}
 
               {/*/!* Add to Cart Section *!/*/}
               {/*<div className="space-y-6">*/}

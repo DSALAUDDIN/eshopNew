@@ -27,13 +27,13 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
         />
 
         {/* Navigation - only show on md and up */}
-        <div className="hidden md:block">
-          <Navigation />
-        </div>
+        {/*<div className="hidden md:block">*/}
+        {/*  <Navigation />*/}
+        {/*</div>*/}
       </div>
 
       {/* Delivery Banner - Not sticky */}
-      <DeliveryBanner />
+      {/*<DeliveryBanner />*/}
 
       {/* Page Content */}
       <main>{children}</main>
