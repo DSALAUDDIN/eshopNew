@@ -120,6 +120,8 @@ export default function AdminProducts() {
   const [totalPages, setTotalPages] = useState(1)
   const [showProductModal, setShowProductModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: '',
@@ -314,6 +316,20 @@ export default function AdminProducts() {
   }
 
   const handleImageUpload = async (file: File) => {
+    setIsUploading(true)
+    setUploadProgress(0)
+
+    // Simulate upload progress
+    const timer = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(timer)
+          return prev
+        }
+        return prev + 5
+      })
+    }, 200)
+
     try {
       const token = localStorage.getItem('adminToken')
       const formData = new FormData()
@@ -328,15 +344,26 @@ export default function AdminProducts() {
         body: formData
       })
 
+      clearInterval(timer)
+      setUploadProgress(100)
+
       if (response.ok) {
         const data = await response.json()
         setProductForm(prev => ({
           ...prev,
           images: [...prev.images, data.url]
         }))
+      } else {
+        console.error('Error uploading image:', await response.text())
       }
     } catch (error) {
       console.error('Error uploading image:', error)
+      clearInterval(timer)
+    } finally {
+      setTimeout(() => {
+        setIsUploading(false)
+        setUploadProgress(0)
+      }, 1000)
     }
   }
 
@@ -576,13 +603,23 @@ export default function AdminProducts() {
                     }}
                     className="hidden"
                     id="image-upload"
+                    disabled={isUploading}
                   />
-                  <label htmlFor="image-upload" className="cursor-pointer">
+                  <label htmlFor="image-upload" className={`cursor-pointer ${isUploading ? 'cursor-not-allowed' : ''}`}>
                     <div className="text-center">
                       <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                       <p className="text-gray-600">Click to upload images</p>
                     </div>
                   </label>
+
+                  {isUploading && (
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  )}
 
                   {productForm.images.length > 0 && (
                     <div className="grid grid-cols-4 gap-2 mt-4">
