@@ -96,14 +96,14 @@ export function Footer() {
                   Contact Us
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => router.push("/delivery")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Delivery
-                </button>
-              </li>
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/delivery")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Delivery*/}
+              {/*  </button>*/}
+              {/*</li>*/}
               <li>
                 <button
                   onClick={() => router.push("/terms")}
@@ -112,14 +112,14 @@ export function Footer() {
                   Terms & Conditions
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => router.push("/privacy")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Privacy Policy
-                </button>
-              </li>
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/privacy")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Privacy Policy*/}
+              {/*  </button>*/}
+              {/*</li>*/}
               <li>
                 <button
                   onClick={() => router.push("/faq")}
@@ -128,14 +128,14 @@ export function Footer() {
                   FAQs
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => router.push("/shipping")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  BD Shipping
-                </button>
-              </li>
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/shipping")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    BD Shipping*/}
+              {/*  </button>*/}
+              {/*</li>*/}
             </ul>
           </div>
 
@@ -151,46 +151,46 @@ export function Footer() {
                   Our Story
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => router.push("/showroom")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Showroom
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => router.push("/lookbook")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Lookbook
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => router.push("/trade-shows")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Trade Shows
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => router.push("/ethics")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Ethical Policy
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => router.push("/sustainability")}
-                  className="hover:text-primary transition-colors font-brandon text-black"
-                >
-                  Sustainability Mission
-                </button>
-              </li>
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/showroom")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Showroom*/}
+              {/*  </button>*/}
+              {/*</li>*/}
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/lookbook")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Lookbook*/}
+              {/*  </button>*/}
+              {/*</li>*/}
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/trade-shows")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Trade Shows*/}
+              {/*  </button>*/}
+              {/*</li>*/}
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/ethics")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Ethical Policy*/}
+              {/*  </button>*/}
+              {/*</li>*/}
+              {/*<li>*/}
+              {/*  <button*/}
+              {/*    onClick={() => router.push("/sustainability")}*/}
+              {/*    className="hover:text-primary transition-colors font-brandon text-black"*/}
+              {/*  >*/}
+              {/*    Sustainability Mission*/}
+              {/*  </button>*/}
+              {/*</li>*/}
             </ul>
           </div>
 
@@ -238,29 +238,29 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div>
-            <h3 className="font-bold mb-4 text-primary font-brandon">GET 5% OFF</h3>
-            <p className="text-sm text-gray-700 mb-4 font-brandon">
-              Sign up to our wholesale newsletter and receive 5% off your first order.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex">
-              <Input
-                placeholder="Enter email address"
-                className="flex-1 text-sm bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 font-brandon"
-                type="email"
-                required
-              />
-              <Button type="submit" className="bg-[hsl(var(--primary))] hover:bg-[#5BB8C1] ml-2 shadow-md border-0 font-brandon">
-                →
-              </Button>
-            </form>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="text-xs text-gray-400 mt-4 cursor-pointer hover:text-primary transition-colors block font-brandon"
-            >
-              BACK TO TOP
-            </button>
-          </div>
+          {/*<div>*/}
+          {/*  <h3 className="font-bold mb-4 text-primary font-brandon">GET 5% OFF</h3>*/}
+          {/*  <p className="text-sm text-gray-700 mb-4 font-brandon">*/}
+          {/*    Sign up to our wholesale newsletter and receive 5% off your first order.*/}
+          {/*  </p>*/}
+          {/*  <form onSubmit={handleNewsletterSubmit} className="flex">*/}
+          {/*    <Input*/}
+          {/*      placeholder="Enter email address"*/}
+          {/*      className="flex-1 text-sm bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 font-brandon"*/}
+          {/*      type="email"*/}
+          {/*      required*/}
+          {/*    />*/}
+          {/*    <Button type="submit" className="bg-[hsl(var(--primary))] hover:bg-[#5BB8C1] ml-2 shadow-md border-0 font-brandon">*/}
+          {/*      →*/}
+          {/*    </Button>*/}
+          {/*  </form>*/}
+          {/*  <button*/}
+          {/*    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}*/}
+          {/*    className="text-xs text-gray-400 mt-4 cursor-pointer hover:text-primary transition-colors block font-brandon"*/}
+          {/*  >*/}
+          {/*    BACK TO TOP*/}
+          {/*  </button>*/}
+          {/*</div>*/}
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
