@@ -773,7 +773,7 @@ export default function AdminProducts() {
                           <TableRow key={product.id}>
                             <TableCell>
                               <div className="flex items-center gap-3">
-                                {product.images?.[0] && (
+                                {product.images?.[0] && product.images[0] !== 'null' && (
                                     <img
                                         src={product.images[0]}
                                         alt={product.name}
@@ -787,21 +787,7 @@ export default function AdminProducts() {
                               </div>
                             </TableCell>
                             <TableCell>{product.category?.name}</TableCell>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{formatCurrency(product.price)}</p>
-                                {product.originalPrice && (
-                                    <p className="text-sm text-gray-500 line-through">
-                                      {formatCurrency(product.originalPrice)}
-                                    </p>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={product.stockQuantity <= 10 ? "destructive" : "secondary"}>
-                                {product.stockQuantity}
-                              </Badge>
-                            </TableCell>
+                            {/* Price and Stock Quantity columns removed as per instruction */}
                             <TableCell>
                               <div className="flex gap-1">
                                 {product.isActive && <Badge variant="secondary">Active</Badge>}
