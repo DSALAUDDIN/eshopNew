@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma'
 import { products, categories } from '@/lib/db/schema'
-import { verifyToken, getTokenFromRequest, createSlug } from '@/lib/auth'
-import { eq, and, not } from 'drizzle-orm'
+import { verifyToken, getTokenFromRequest } from '@/lib/auth'
+import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { prepareProductData } from '../product-logic'
 
 async function verifyAdmin(request: NextRequest) {
   const token = getTokenFromRequest(request)
@@ -39,33 +40,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const id = params.id
     const data = await request.json()
 
-    // If name is being updated, regenerate the slug to ensure it's valid
-    if (data.name) {
-        data.slug = createSlug(data.name);
+    const preparedData = await prepareProductData(data, id);
 
-        // Check if the generated slug already exists for a different product
-        const existingProduct = await db
-            .select({ id: products.id })
-            .from(products)
-            .where(and(eq(products.slug, data.slug), not(eq(products.id, id))))
-            .limit(1);
-
-        // If the slug is in use, append a short random string to make it unique
-        if (existingProduct.length > 0) {
-            const randomString = Math.random().toString(36).substring(2, 7);
-            data.slug = `${data.slug}-${randomString}`;
-        }
-    }
-
-    // Always set the updatedAt timestamp on the server
-    data.updatedAt = new Date();
-
-    // Prevent createdAt from being updated
-    if (data.createdAt) {
-        delete data.createdAt;
-    }
-
-    const updated = await db.update(products).set(data).where(eq(products.id, id)).returning()
+    const updated = await db.update(products).set(preparedData).where(eq(products.id, id)).returning()
 
     if (!updated[0]) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
