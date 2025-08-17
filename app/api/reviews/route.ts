@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma'
 import { reviews, products } from '@/lib/db/schema'
 import { eq, and, desc, count } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 
 // GET /api/reviews - Get approved reviews for a product
 export async function GET(request: NextRequest) {
@@ -105,8 +106,11 @@ export async function POST(request: NextRequest) {
       comment,
       customerName,
       customerEmail,
-      isApproved: false // Reviews require admin approval
+      isApproved: true // Reviews are now automatically approved
     }).returning()
+
+    // Revalidate the product page to show the new review after approval
+    revalidatePath(`/product/${productId}`);
 
     return NextResponse.json(newReview[0], { status: 201 })
   } catch (error) {

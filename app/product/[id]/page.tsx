@@ -1,6 +1,7 @@
 import { getProductById, getRelatedProducts, getProducts } from "@/lib/data";
 import { ProductDetails } from "@/components/product-details";
 import { notFound } from "next/navigation";
+import { CustomerReviews } from "@/components/customer-reviews";
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
     const productId = params.id;
@@ -20,6 +21,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
             product={product}
             relatedProducts={relatedProducts}
             bestSellingProducts={bestSellingProducts}
+            reviewsComponent={<CustomerReviews productId={productId} />}
         />
     );
 }

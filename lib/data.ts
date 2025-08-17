@@ -1,5 +1,5 @@
 import { db } from '@/lib/prisma';
-import { products, categories, subcategories } from '@/lib/db/schema';
+import { products, categories, subcategories, reviews } from '@/lib/db/schema';
 import { eq, and, desc, asc, not } from 'drizzle-orm';
 
 export async function getProducts(options: {
@@ -69,7 +69,13 @@ export async function getProducts(options: {
 export async function getProductById(id: string) {
     const productResult = await db.query.products.findFirst({
         where: eq(products.id, id),
-        with: { category: true }
+        with: {
+            category: true,
+            reviews: {
+                where: eq(reviews.isApproved, true),
+                orderBy: [desc(reviews.createdAt)],
+            }
+        }
     });
 
     if (!productResult) return null;
@@ -119,4 +125,35 @@ export async function getCategoryDetails(slug: string) {
     });
 
     return categoryResult || null;
+}
+
+export async function getReviews(options: { productId?: string; limit?: number } = {}) {
+    const conditions = [eq(reviews.isApproved, true)];
+    if (options.productId) {
+        conditions.push(eq(reviews.productId, options.productId));
+    }
+
+    const query = db
+        .select({
+            id: reviews.id,
+            rating: reviews.rating,
+            title: reviews.title,
+            comment: reviews.comment,
+            customerName: reviews.customerName,
+            createdAt: reviews.createdAt,
+            product: {
+                name: products.name,
+                id: products.id,
+            },
+        })
+        .from(reviews)
+        .leftJoin(products, eq(reviews.productId, products.id))
+        .where(and(...conditions))
+        .orderBy(desc(reviews.createdAt));
+
+    if (options.limit) {
+        query.limit(options.limit);
+    }
+
+    return await query;
 }
