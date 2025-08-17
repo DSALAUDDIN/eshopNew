@@ -2,17 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useStore } from '@/lib/store'
 import { ProductGrid } from '@/components/product-grid'
-import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 
 export function CategoryView({ initialProducts, categoryDetails }: { initialProducts: Product[], categoryDetails: any }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { addToCart } = useStore()
 
   const [filteredProducts, setFilteredProducts] = useState(initialProducts)
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest')
@@ -24,10 +20,6 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
     params.set('subcategory', selectedSubcategory)
     router.replace(`${window.location.pathname}?${params.toString()}`)
   }, [sortBy, selectedSubcategory, router, searchParams])
-
-  const handleAddToCart = (product: Product) => {
-    addToCart(product, 1)
-  }
 
   const handleViewDetails = (product: Product) => {
     router.push(`/product/${product.id}`)
@@ -101,7 +93,6 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
               <ProductGrid
                 products={filteredProducts}
                 onViewDetails={handleViewDetails}
-                onAddToCart={handleAddToCart}
               />
             ) : (
               <div className="text-center py-12">

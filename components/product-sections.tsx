@@ -3,7 +3,6 @@
 import type React from "react"
 import type { Product } from "@/lib/types"
 import { useRouter } from "next/navigation"
-import { useStore } from "@/lib/store"
 import { ProductGrid } from "@/components/product-grid"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -16,26 +15,9 @@ interface ProductSectionsProps {
 
 export function ProductSections({ featuredProducts, saleProducts, newProducts }: ProductSectionsProps) {
     const router = useRouter()
-    const { addToCart } = useStore()
 
     const handleViewDetails = (product: Product) => {
         router.push(`/product/${product.id}`)
-    }
-
-    const handleAddToCart = (product: Product, event?: React.MouseEvent<HTMLButtonElement>) => {
-        addToCart(product, 1)
-
-        if (event?.currentTarget) {
-            const button = event.currentTarget
-            const originalText = button.textContent
-            button.textContent = "Added!"
-            button.style.backgroundColor = "#10b981"
-
-            setTimeout(() => {
-                button.textContent = originalText
-                button.style.backgroundColor = ""
-            }, 1500)
-        }
     }
 
     return (
@@ -54,7 +36,6 @@ export function ProductSections({ featuredProducts, saleProducts, newProducts }:
                         <ProductGrid
                             products={featuredProducts}
                             onViewDetails={handleViewDetails}
-                            onAddToCart={handleAddToCart}
                         />
                     ) : (
                         <div className="text-center py-8">
@@ -78,7 +59,6 @@ export function ProductSections({ featuredProducts, saleProducts, newProducts }:
                         <ProductGrid
                             products={saleProducts}
                             onViewDetails={handleViewDetails}
-                            onAddToCart={handleAddToCart}
                         />
 
                         <div className="text-center mt-8">
@@ -104,7 +84,6 @@ export function ProductSections({ featuredProducts, saleProducts, newProducts }:
                         <ProductGrid
                             products={newProducts}
                             onViewDetails={handleViewDetails}
-                            onAddToCart={handleAddToCart}
                         />
 
                         <div className="text-center mt-8">

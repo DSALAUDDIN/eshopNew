@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, Home, Minus, Plus, Share2 } from 'lucide-react'
+import { Star, Heart, Share2, Home } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import ProductCardSmall from '@/components/product-card-small'
@@ -24,9 +24,8 @@ interface ProductDetailsProps {
 
 export function ProductDetails({ product, relatedProducts, bestSellingProducts }: ProductDetailsProps) {
     const router = useRouter();
-    const { addToCart, toggleFavorite, isFavorite } = useStore();
+    const { toggleFavorite, isFavorite } = useStore();
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-    const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
 
     const images = useMemo<string[]>(() => {
@@ -55,10 +54,6 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
         return sum / product.reviews.length;
     }, [product]);
 
-    const handleAddToCart = () => {
-        if (product) addToCart(product, quantity);
-    };
-
     const handleToggleFavorite = () => {
         if (product) toggleFavorite(product.id);
     };
@@ -79,9 +74,6 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
             alert('Failed to share. Please copy the link manually.');
         }
     };
-
-    const formatPrice = (price: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
 
     const renderStars = (rating: number) =>
         Array.from({ length: 5 }, (_, i) => (
@@ -197,54 +189,13 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
                                 {product.sku && <span className="text-sm text-gray-500">SKU: {product.sku}</span>}
                             </div>
                         </div>
-
-                        {/* Add to Cart Section */}
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center border rounded-lg">
-                                    <button
-                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                        className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                                        aria-label="Decrease quantity"
-                                        type="button"
-                                    >
-                                        <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="px-4 py-3 font-medium min-w-[60px] text-center">{quantity}</span>
-                                    <button
-                                        onClick={() => setQuantity(q => q + 1)}
-                                        className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                                        aria-label="Increase quantity"
-                                        type="button"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                    </button>
-                                </div>
-
-                                <Button
-                                    onClick={handleAddToCart}
-                                    disabled={!product.inStock}
-                                    className="flex-1 h-12 text-lg"
-                                    size="lg"
-                                >
-                                    <ShoppingCart className="h-5 w-5 mr-2" />
-                                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                                </Button>
-                            </div>
-
-                            {product.stockQuantity && product.stockQuantity <= 10 && (
-                                <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">
-                                    <span className="font-medium">⚠️ Only {product.stockQuantity} left in stock!</span>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
 
                 {/* Product Details Tabs */}
                 <div className="mt-16">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="description">Description</TabsTrigger>
                             <TabsTrigger value="reviews">Reviews ({product.reviews?.length || 0})</TabsTrigger>
                         </TabsList>
