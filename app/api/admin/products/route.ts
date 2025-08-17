@@ -3,8 +3,9 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma'
 import { users, products, categories, subcategories } from '@/lib/db/schema'
-import { verifyToken, getTokenFromRequest } from '@/lib/auth'
-import { eq, and, like, desc, count } from 'drizzle-orm'
+import { verifyToken, getTokenFromRequest, createSlug } from '@/lib/auth'
+import { eq, and, like, desc, count, not } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 
 async function verifyAdmin(request: NextRequest) {
   const token = getTokenFromRequest(request)
@@ -170,10 +171,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const slug = name
-        .toLowerCase()
-        .replace(/[^a-z0-9 -]/g, '')
-        .replace(/\s+/g, '-')
+    let slug = createSlug(name);
+
+    // Check if the generated slug already exists
+    const existingProduct = await db
+        .select({ id: products.id })
+        .from(products)
+        .where(eq(products.slug, slug))
+        .limit(1);
+
+    // If the slug is in use, append a short random string to make it unique
+    if (existingProduct.length > 0) {
+        const randomString = Math.random().toString(36).substring(2, 7);
+        slug = `${slug}-${randomString}`;
+    }
 
     console.log('✅ Creating product with processed data:', {
       name,
@@ -214,6 +225,19 @@ export async function POST(request: NextRequest) {
         .returning()
 
     console.log('✅ Product created successfully:', newProduct[0])
+
+    // Revalidate paths to show updated data
+    revalidatePath('/') // Revalidate home page
+    revalidatePath(`/product/${newProduct[0].slug}`) // Revalidate product page
+
+    // Revalidate the category page if the product has one
+    if (newProduct[0].categoryId) {
+        const category = await db.select().from(categories).where(eq(categories.id, newProduct[0].categoryId));
+        if (category[0]) {
+            revalidatePath(`/category/${category[0].slug}`)
+        }
+    }
+
     return NextResponse.json(newProduct[0], { status: 201 })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -221,7 +245,7 @@ export async function POST(request: NextRequest) {
 
     let errorMessage = 'Failed to create product'
     if (message.includes('UNIQUE constraint')) {
-      errorMessage = 'A product with this SKU already exists'
+      errorMessage = 'A product with this SKU or slug already exists'
     } else if (message.includes('FOREIGN KEY constraint')) {
       errorMessage = 'Invalid category or subcategory selected'
     } else if (message.includes('NOT NULL constraint')) {
