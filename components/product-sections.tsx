@@ -19,7 +19,7 @@ export function ProductSections({ featuredProducts, saleProducts, newProducts }:
     const { addToCart } = useStore()
 
     const handleViewDetails = (product: Product) => {
-        router.push(`/product/${product.slug}`)
+        router.push(`/product/${product.id}`)
     }
 
     const handleAddToCart = (product: Product, event?: React.MouseEvent<HTMLButtonElement>) => {
