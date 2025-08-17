@@ -172,17 +172,8 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Product created successfully:', newProduct[0])
 
-    // Revalidate paths to show updated data
-    revalidatePath('/') // Revalidate home page
-    revalidatePath(`/product/${newProduct[0].slug}`) // Revalidate product page
-
-    // Revalidate the category page if the product has one
-    if (newProduct[0].categoryId) {
-        const category = await db.select().from(categories).where(eq(categories.id, newProduct[0].categoryId));
-        if (category[0]) {
-            revalidatePath(`/category/${category[0].slug}`)
-        }
-    }
+    // Revalidate the entire site to ensure all caches are cleared
+    revalidatePath('/', 'layout');
 
     return NextResponse.json(newProduct[0], { status: 201 })
   } catch (err: unknown) {
