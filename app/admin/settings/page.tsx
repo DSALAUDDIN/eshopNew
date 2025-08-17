@@ -591,8 +591,8 @@ export default function AdminSettings() {
           <TabsTrigger value="branding">🎨 Branding</TabsTrigger>
           <TabsTrigger value="site">🌐 Site Info</TabsTrigger>
           <TabsTrigger value="contact">📧 Contact</TabsTrigger>
-          <TabsTrigger value="commerce">💰 E-commerce</TabsTrigger>
-          <TabsTrigger value="categories">📂 Categories</TabsTrigger>
+          {/*<TabsTrigger value="commerce">💰 E-commerce</TabsTrigger>*/}
+          {/*<TabsTrigger value="categories">📂 Categories</TabsTrigger>*/}
         </TabsList>
 
         {/* Branding Tab */}
@@ -898,7 +898,7 @@ export default function AdminSettings() {
         </TabsContent>
 
         {/* Categories Tab */}
-        <TabsContent value="categories">
+        <TabsContent value="categories"> {/* Categories Tab */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

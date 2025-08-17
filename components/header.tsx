@@ -146,7 +146,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                               <ul className="columns-4 gap-x-8">
                                 {activeMenu.subcategories.map((subcat: any) => (
                                     <li key={subcat.id} className="mb-2 break-inside-avoid-column">
-                                      <a href={`/category/${subcat.slug}`} className="text-gray-600 hover:text-teal-600 text-sm block">{subcat.name}</a>
+                                      <a href={`/category/${activeMenu.slug}?subcategory=${subcat.slug}`} className="text-gray-600 hover:text-teal-600 text-sm block">{subcat.name}</a>
                                     </li>
                                 ))}
                               </ul>

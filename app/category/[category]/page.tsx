@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { ProductGrid } from '@/components/product-grid'
-import CategoryHeader from '@/components/CategoryHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -30,7 +29,6 @@ export default function CategoryPage() {
   const [currentCategory, setCurrentCategory] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('newest')
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [selectedSubcategory, setSelectedSubcategory] = useState('')
 
   // Fetch initial data
@@ -38,7 +36,6 @@ export default function CategoryPage() {
     fetchCategories()
     if (categorySlug) {
       if (categorySlug === 'all') {
-        // Fetch all products if category is 'all'
         fetchProducts({ limit: 100 })
       } else {
         fetchProducts({ category: categorySlug, limit: 50 })
@@ -61,18 +58,9 @@ export default function CategoryPage() {
 
   // Apply filters and sorting
   useEffect(() => {
-    // Ensure products is always an array before spreading
     let filtered = Array.isArray(products) ? [...products] : []
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(product =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-
-    // Subcategory filter - handle both subcategory slug and name
+    // Subcategory filter
     if (selectedSubcategory && selectedSubcategory !== 'all') {
       filtered = filtered.filter(product => {
         if (typeof product.subcategory === 'string') {
@@ -82,14 +70,6 @@ export default function CategoryPage() {
         }
         return false
       })
-    }
-
-    // Price range filter
-    if (priceRange.min) {
-      filtered = filtered.filter(product => product.price >= parseFloat(priceRange.min))
-    }
-    if (priceRange.max) {
-      filtered = filtered.filter(product => product.price <= parseFloat(priceRange.max))
     }
 
     // URL params filters
@@ -131,14 +111,13 @@ export default function CategoryPage() {
         break
       case 'newest':
       default:
-        // Already sorted by newest in API
         break
     }
 
     setFilteredProducts(filtered)
-  }, [products, searchTerm, selectedSubcategory, priceRange, sortBy, searchParams])
+  }, [products, searchTerm, selectedSubcategory, sortBy, searchParams])
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: Product) => { // Keep this line
     addToCart(product, 1)
   }
 
@@ -147,17 +126,14 @@ export default function CategoryPage() {
   }
 
   const clearFilters = () => {
-    setSearchTerm('')
+    setSearchTerm('') // Keep this line
     setSelectedSubcategory('all')
-    setPriceRange({ min: '', max: '' })
     setSortBy('newest')
   }
 
   const activeFiltersCount = [
     searchTerm,
     selectedSubcategory,
-    priceRange.min,
-    priceRange.max,
     searchParams.get('sale'),
     searchParams.get('new'),
     searchParams.get('featured')
@@ -167,21 +143,26 @@ export default function CategoryPage() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white shadow-sm">
-          <div className="container mx-auto px-4 py-8">
-            {/* Category Header with Dynamic Thumbnail */}
-            {currentCategory && (
-                <CategoryHeader
-                    image={currentCategory.image}
-                    title={currentCategory.name}
-                    description={currentCategory.description}
-                    categoryId={currentCategory.id}
-                />
-            )}
-
-            {/* Fallback if no category found */}
-            {!currentCategory && (
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-2">Products</h1>
+          <div className="container mx-auto px-4 py-8 text-center lg:text-left">
+            {currentCategory ? (
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 capitalize">
+                    {currentCategory.name}
+                  </h1>
+                  {currentCategory.description && (
+                      <p className="text-gray-600 text-base md:text-lg max-w-2xl">
+                        {currentCategory.description}
+                      </p>
+                  )}
+                </div>
+            ) : (
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                    Products
+                  </h1>
+                  <p className="text-gray-600 text-base md:text-lg">
+                    Explore our latest collection of products
+                  </p>
                 </div>
             )}
           </div>
@@ -209,21 +190,6 @@ export default function CategoryPage() {
                   )}
                 </div>
 
-                {/* Search */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">Search</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                        type="text"
-                        placeholder="Search products..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                    />
-                  </div>
-                </div>
-
                 {/* Subcategories */}
                 {currentCategory?.subcategories && currentCategory.subcategories.length > 0 && (
                     <div className="mb-6">
@@ -243,25 +209,6 @@ export default function CategoryPage() {
                       </Select>
                     </div>
                 )}
-
-                {/* Price Range */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">Price Range</label>
-                  <div className="flex gap-2">
-                    <Input
-                        type="number"
-                        placeholder="Min"
-                        value={priceRange.min}
-                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                    />
-                    <Input
-                        type="number"
-                        placeholder="Max"
-                        value={priceRange.max}
-                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                    />
-                  </div>
-                </div>
 
                 {/* Quick Filters */}
                 <div className="space-y-2">
@@ -283,7 +230,6 @@ export default function CategoryPage() {
 
             {/* Products Grid */}
             <div className="lg:w-3/4">
-              {/* Sort and Results Header */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div>
                   <p className="text-gray-600">
