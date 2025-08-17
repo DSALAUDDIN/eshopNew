@@ -13,16 +13,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import ProductCardSmall from '@/components/product-card-small'
 import { ReviewForm } from '@/components/review-form'
+import { CustomerReviews } from '@/components/customer-reviews'
 import type { Product } from '@/lib/types'
 
 interface ProductDetailsProps {
     product: Product;
     relatedProducts: Product[];
     bestSellingProducts: Product[];
-    reviewsComponent: React.ReactNode;
 }
 
-export function ProductDetails({ product, relatedProducts, bestSellingProducts, reviewsComponent }: ProductDetailsProps) {
+export function ProductDetails({ product, relatedProducts, bestSellingProducts }: ProductDetailsProps) {
     const router = useRouter();
     const { toggleFavorite, isFavorite } = useStore();
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -210,7 +210,7 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts, 
 
                         <TabsContent value="reviews" className="mt-8">
                             <div className="space-y-8">
-                                {reviewsComponent}
+                                <CustomerReviews reviews={product.reviews || []} />
                                 <div className="border-t pt-8">
                                     <h3 className="text-2xl font-bold text-gray-900 mb-6">Write a Review</h3>
                                     <ReviewForm
