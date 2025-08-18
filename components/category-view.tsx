@@ -18,12 +18,22 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
   const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || 'all')
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('sort', sortBy)
-    params.set('subcategory', selectedSubcategory)
-    // Use router.push to trigger a server refresh
-    router.push(`${window.location.pathname}?${params.toString()}`)
-  }, [sortBy, selectedSubcategory, router, searchParams])
+    // Only update the URL if the params have changed
+    const params = new URLSearchParams(window.location.search)
+    let shouldUpdate = false;
+    if (params.get('sort') !== sortBy) {
+      params.set('sort', sortBy)
+      shouldUpdate = true;
+    }
+    if (params.get('subcategory') !== selectedSubcategory) {
+      params.set('subcategory', selectedSubcategory)
+      shouldUpdate = true;
+    }
+    if (shouldUpdate) {
+      // Use router.replace to avoid adding to browser history
+      router.replace(`${window.location.pathname}?${params.toString()}`)
+    }
+  }, [sortBy, selectedSubcategory, router])
 
   const handleViewDetails = (product: Product) => {
     router.push(`/product/${product.id}`)
