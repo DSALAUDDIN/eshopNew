@@ -3,6 +3,8 @@ import { db } from '@/lib/prisma'
 import { products } from '@/lib/db/schema'
 import { verifyToken, getTokenFromRequest } from '@/lib/auth'
 import { eq } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
+import { prepareProductData } from '../product-logic'
 
 async function verifyAdmin(request: NextRequest) {
   const token = getTokenFromRequest(request)
@@ -37,52 +39,26 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
     const id = params.id
     const data = await request.json()
-    console.log('Update product request data:', data)
 
-    // Validate required fields
-    const requiredFields = [
-      'name', 'slug', 'description', 'price', 'sku', 'images', 'inStock', 'stockQuantity',
-      'isNew', 'isSale', 'isFeatured', 'isActive', 'categoryId', 'updatedAt'
-    ]
-    for (const field of requiredFields) {
-      if (data[field] === undefined || data[field] === null || data[field] === '') {
-        return NextResponse.json({ error: `Missing or invalid field: ${field}` }, { status: 400 })
-      }
-    }
-    // Validate images is a string
-    if (typeof data.images !== 'string') {
-      return NextResponse.json({ error: 'Images must be a JSON string' }, { status: 400 })
-    }
-    // Validate booleans are 0/1
-    const boolFields = ['isNew', 'isSale', 'isFeatured', 'isActive', 'inStock']
-    for (const field of boolFields) {
-      if (data[field] !== 0 && data[field] !== 1) {
-        return NextResponse.json({ error: `Field ${field} must be 0 or 1` }, { status: 400 })
-      }
-    }
-    // Validate price and stockQuantity are numbers
-    if (isNaN(Number(data.price)) || isNaN(Number(data.stockQuantity))) {
-      return NextResponse.json({ error: 'Price and stockQuantity must be numbers' }, { status: 400 })
-    }
-    // Ensure createdAt and updatedAt are Date objects
-    const fixDate = (val: any) => {
-      if (val instanceof Date) return val;
-      if (typeof val === 'number') return new Date(val * 1000);
-      if (typeof val === 'string' && /^\d+$/.test(val)) return new Date(Number(val) * 1000);
-      return new Date(val);
-    };
-    data.createdAt = fixDate(data.createdAt);
-    data.updatedAt = fixDate(data.updatedAt);
-    const updated = await db.update(products).set(data).where(eq(products.id, id)).returning()
+    const preparedData = await prepareProductData(data, id);
+
+    const updated = await db.update(products).set(preparedData).where(eq(products.id, id)).returning()
+
     if (!updated[0]) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
+
+    // Revalidate the entire site to ensure all caches are cleared
+    revalidatePath('/', 'layout');
+
     return NextResponse.json({ product: updated[0] })
   } catch (error: any) {
     console.error('Error updating product:', error)
-    if (error && error.stack) {
-      console.error('Error stack:', error.stack)
+
+    if (error.message?.includes('UNIQUE constraint failed')) {
+        return NextResponse.json({ error: 'A product with this slug already exists. Please try a different name.' }, { status: 409 });
     }
+
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
   }
 }
@@ -101,6 +77,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (deleted.length === 0) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
+
+    // Revalidate the entire site to ensure all caches are cleared
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ message: 'Product deleted successfully' });
 

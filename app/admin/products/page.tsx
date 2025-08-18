@@ -122,16 +122,17 @@ export default function AdminProducts() {
   const [totalPages, setTotalPages] = useState(1)
   const [showProductModal, setShowProductModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: '',
     description: '',
-    price: '',
-    originalPrice: '',
+    price: '0',
+    originalPrice: '0',
     sku: '',
     categoryId: '',
     subcategoryId: '',
-    stockQuantity: '',
+    stockQuantity: '10',
     isNew: false,
     isSale: false,
     isFeatured: false,
@@ -352,6 +353,7 @@ export default function AdminProducts() {
   }
 
   const handleImageUpload = async (file: File) => {
+    setIsUploadingImage(true)
     try {
       const token = localStorage.getItem('adminToken')
       const formData = new FormData()
@@ -375,6 +377,8 @@ export default function AdminProducts() {
       }
     } catch (error) {
       console.error('Error uploading image:', error)
+    } finally {
+      setIsUploadingImage(false)
     }
   }
 
@@ -389,12 +393,12 @@ export default function AdminProducts() {
     setProductForm({
       name: '',
       description: '',
-      price: '',
-      originalPrice: '',
+      price: '0',
+      originalPrice: '0',
       sku: '',
       categoryId: '',
       subcategoryId: '',
-      stockQuantity: '',
+      stockQuantity: '10',
       isNew: false,
       isSale: false,
       isFeatured: false,
@@ -614,11 +618,14 @@ export default function AdminProducts() {
                         }}
                         className="hidden"
                         id="image-upload"
+                        disabled={isUploadingImage}
                     />
-                    <label htmlFor="image-upload" className="cursor-pointer">
+                    <label htmlFor="image-upload" className={`cursor-pointer ${isUploadingImage ? 'opacity-50' : ''}`}>
                       <div className="text-center">
                         <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-gray-600">Click to upload images</p>
+                        <p className="text-gray-600">
+                          {isUploadingImage ? 'Uploading, please wait...' : 'Click to upload images'}
+                        </p>
                       </div>
                     </label>
 
@@ -773,7 +780,7 @@ export default function AdminProducts() {
                           <TableRow key={product.id}>
                             <TableCell>
                               <div className="flex items-center gap-3">
-                                {product.images?.[0] && (
+                                {product.images?.[0] && product.images[0] !== 'null' && (
                                     <img
                                         src={product.images[0]}
                                         alt={product.name}
@@ -787,21 +794,7 @@ export default function AdminProducts() {
                               </div>
                             </TableCell>
                             <TableCell>{product.category?.name}</TableCell>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{formatCurrency(product.price)}</p>
-                                {product.originalPrice && (
-                                    <p className="text-sm text-gray-500 line-through">
-                                      {formatCurrency(product.originalPrice)}
-                                    </p>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={product.stockQuantity <= 10 ? "destructive" : "secondary"}>
-                                {product.stockQuantity}
-                              </Badge>
-                            </TableCell>
+                            {/* Price and Stock Quantity columns removed as per instruction */}
                             <TableCell>
                               <div className="flex gap-1">
                                 {product.isActive && <Badge variant="secondary">Active</Badge>}

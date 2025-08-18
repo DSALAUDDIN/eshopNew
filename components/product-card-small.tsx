@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '@/lib/store'
 import type { Product } from '@/lib/types'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ProductCardSmallProps {
   product: Product
@@ -16,6 +17,7 @@ interface ProductCardSmallProps {
 export default function ProductCardSmall({ product }: ProductCardSmallProps) {
   const { addToCart, toggleFavorite, isFavorite } = useStore()
   const [isHovered, setIsHovered] = useState(false)
+  const [isImageLoading, setIsImageLoading] = useState(true)
 
   const formatPrice = (price: number) => {
     // Get currency from settings or use BDT as default for Bangladesh
@@ -61,6 +63,9 @@ export default function ProductCardSmall({ product }: ProductCardSmallProps) {
       >
         {/* Product Image */}
         <div className="relative aspect-square overflow-hidden bg-gray-50">
+          {isImageLoading && (
+            <Skeleton className="absolute inset-0 w-full h-full bg-gray-200" />
+          )}
           <Image
             src={(() => {
               try {
@@ -78,7 +83,10 @@ export default function ProductCardSmall({ product }: ProductCardSmallProps) {
             })()}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className={`object-cover group-hover:scale-105 transition-all duration-300 ${
+              isImageLoading ? 'opacity-0' : 'opacity-100'
+            }`}
+            onLoadingComplete={() => setIsImageLoading(false)}
           />
 
           {/* Badges */}
@@ -144,16 +152,16 @@ export default function ProductCardSmall({ product }: ProductCardSmallProps) {
           )}
 
           {/* Price */}
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-900">
-              {formatPrice(product.price)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
+          {/*<div className="flex items-center gap-2">*/}
+          {/*  <span className="font-bold text-gray-900">*/}
+          {/*    {formatPrice(product.price)}*/}
+          {/*  </span>*/}
+          {/*  {product.originalPrice && (*/}
+          {/*    <span className="text-sm text-gray-500 line-through">*/}
+          {/*      {formatPrice(product.originalPrice)}*/}
+          {/*    </span>*/}
+          {/*  )}*/}
+          {/*</div>*/}
         </div>
       </div>
     </Link>

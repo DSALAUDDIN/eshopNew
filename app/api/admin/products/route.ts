@@ -5,6 +5,8 @@ import { db } from '@/lib/prisma'
 import { users, products, categories, subcategories } from '@/lib/db/schema'
 import { verifyToken, getTokenFromRequest } from '@/lib/auth'
 import { eq, and, like, desc, count } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
+import { prepareProductData } from './product-logic'
 
 async function verifyAdmin(request: NextRequest) {
   const token = getTokenFromRequest(request)
@@ -120,35 +122,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📝 Received product data:', body)
 
-    const {
-      name,
-      description,
-      price,
-      originalPrice,
-      sku,
-      images,
-      categoryId,
-      subcategoryId,
-      inStock,
-      stockQuantity,
-      isNew,
-      isSale,
-      isFeatured,
-      weight,
-      dimensions,
-      materials,
-      careInstructions,
-      seoTitle,
-      seoDescription
-    } = body
+    let productData = { ...body };
 
     // Validate required fields
     const missingFields: string[] = []
-    if (!name) missingFields.push('name')
-    if (!description) missingFields.push('description')
-    if (!price) missingFields.push('price')
-    if (!sku) missingFields.push('sku')
-    if (!categoryId) missingFields.push('categoryId')
+    if (!productData.name) missingFields.push('name')
+    if (!productData.description) missingFields.push('description')
+    if (!productData.price) missingFields.push('price')
+    if (!productData.sku) missingFields.push('sku')
+    if (!productData.categoryId) missingFields.push('categoryId')
 
     if (missingFields.length > 0) {
       console.log('❌ Missing required fields:', missingFields)
@@ -158,62 +140,41 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const priceNum = parseFloat(price)
-    const originalPriceNum = originalPrice ? parseFloat(originalPrice) : null
-    const stockQuantityNum = parseInt(stockQuantity, 10) || 0
+    // Data type conversions and setting defaults
+    productData.price = parseFloat(productData.price)
+    productData.originalPrice = productData.originalPrice ? parseFloat(productData.originalPrice) : null
+    productData.stockQuantity = parseInt(productData.stockQuantity, 10) || 0
+    productData.images = JSON.stringify(productData.images || [])
+    productData.subcategoryId = productData.subcategoryId || null
+    productData.inStock = productData.inStock !== undefined ? productData.inStock : true
+    productData.isNew = productData.isNew || false
+    productData.isSale = productData.isSale || false
+    productData.isFeatured = productData.isFeatured || false
+    productData.isActive = true // New products are active by default
 
-    if (isNaN(priceNum)) {
-      console.log('❌ Invalid price value:', price)
+    if (isNaN(productData.price)) {
+      console.log('❌ Invalid price value:', body.price)
       return NextResponse.json(
           { error: 'Invalid price value' },
           { status: 400 }
       )
     }
 
-    const slug = name
-        .toLowerCase()
-        .replace(/[^a-z0-9 -]/g, '')
-        .replace(/\s+/g, '-')
+    // Prepare data for insertion (e.g., create slug)
+    const preparedData = await prepareProductData(productData);
 
-    console.log('✅ Creating product with processed data:', {
-      name,
-      slug,
-      price: priceNum,
-      originalPrice: originalPriceNum,
-      sku,
-      categoryId,
-      subcategoryId: subcategoryId || null,
-      stockQuantity: stockQuantityNum
-    })
+    console.log('✅ Creating product with processed data:', preparedData)
 
     const newProduct = await db
         .insert(products)
-        .values({
-          name,
-          slug,
-          description,
-          price: priceNum,
-          originalPrice: originalPriceNum,
-          sku,
-          images: JSON.stringify(images || []),
-          categoryId,
-          subcategoryId: subcategoryId || null,
-          inStock: inStock !== undefined ? inStock : true,
-          stockQuantity: stockQuantityNum,
-          isNew: isNew || false,
-          isSale: isSale || false,
-          isFeatured: isFeatured || false,
-          isActive: true,
-          weight: weight || null,
-          dimensions: dimensions || null,
-          materials: materials || null,
-          careInstructions: careInstructions || null,
-          seoTitle: seoTitle || null,
-          seoDescription: seoDescription || null
-        })
+        .values(preparedData)
         .returning()
 
     console.log('✅ Product created successfully:', newProduct[0])
+
+    // Revalidate the entire site to ensure all caches are cleared
+    revalidatePath('/', 'layout');
+
     return NextResponse.json(newProduct[0], { status: 201 })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -221,7 +182,7 @@ export async function POST(request: NextRequest) {
 
     let errorMessage = 'Failed to create product'
     if (message.includes('UNIQUE constraint')) {
-      errorMessage = 'A product with this SKU already exists'
+      errorMessage = 'A product with this SKU or slug already exists'
     } else if (message.includes('FOREIGN KEY constraint')) {
       errorMessage = 'Invalid category or subcategory selected'
     } else if (message.includes('NOT NULL constraint')) {

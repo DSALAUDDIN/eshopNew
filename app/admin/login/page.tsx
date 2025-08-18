@@ -86,7 +86,7 @@ export default function AdminLogin() {
                 placeholder="admin@example.com"
               />
             </div>
-
+            {/**/}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input

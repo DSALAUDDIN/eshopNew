@@ -1,6 +1,7 @@
 "use client"
 
 import { Search, User, ShoppingBag, Phone, Menu, X } from "lucide-react"
+import { FaWhatsapp as Whatsapp} from "react-icons/fa";
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -52,9 +53,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
         <header className="bg-[#6cb2da] text-white z-50 sticky top-0 shadow-md" onMouseLeave={() => setActiveMenu(null)}>
           {/* === TOP BAR SECTION === */}
           <div className="border-b border-gray-200/30">
-            <div className="bg-[#559ac8] text-white text-center py-2 text-sm font-semibold">
-              FREE UK DELIVERY OVER £200 / 200€ / $200
-            </div>
+
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between gap-4 py-4">
                 {/* Left: Logo & Mobile Menu */}
@@ -64,10 +63,10 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                   </Button>
                   <button onClick={() => router.push("/")} aria-label="Go home">
                     {loading ? (
-                      <div className="h-10 w-40 animate-pulse rounded-md bg-white/30"></div>
+                      <div className="h-16 w-56 animate-pulse rounded-md bg-white/30"></div>
                     ) : (
-                      settings && (
-                        <img src={settings.site_logo} alt={settings.site_name || 'Site Logo'} className="h-10 object-contain" />
+                      settings?.site_logo && (
+                        <img src={settings.site_logo} alt={settings.site_name || 'Site Logo'} className="h-[100px] w-[100px] object-contain" />
                       )
                     )}
                   </button>
@@ -88,11 +87,9 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
                 {/* Right: Icons */}
                 <div className="flex items-center justify-end space-x-4 text-sm">
-                  <a href="#" className="hidden lg:flex items-center gap-2 hover:text-gray-200"><User size={20} /> Login to TRADE</a>
-                  <a href="#" className="flex items-center gap-2 hover:text-gray-200"><ShoppingBag size={20} /> £0.00</a>
                   {settings && settings.contact_phone && (
-                    <a href={`tel:${settings.contact_phone}`} className="hidden lg:flex items-center gap-2 hover:text-gray-200">
-                      <Phone size={20} /> {settings.contact_phone}
+                    <a href={`https://wa.me/${settings.contact_phone}`} target="_blank" rel="noopener noreferrer" className="hidden lg:flex items-center gap-2 text-white hover:text-gray-200">
+                      <Whatsapp size={20} /> {settings.contact_phone}
                     </a>
                   )}
                 </div>
@@ -150,7 +147,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                               <ul className="columns-4 gap-x-8">
                                 {activeMenu.subcategories.map((subcat: any) => (
                                     <li key={subcat.id} className="mb-2 break-inside-avoid-column">
-                                      <a href={`/category/${subcat.slug}`} className="text-gray-600 hover:text-teal-600 text-sm block">{subcat.name}</a>
+                                      <a href={`/category/${activeMenu.slug}?subcategory=${subcat.slug}`} className="text-gray-600 hover:text-teal-600 text-sm block">{subcat.name}</a>
                                     </li>
                                 ))}
                               </ul>

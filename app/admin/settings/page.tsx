@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,7 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { Upload, Globe, Mail, DollarSign, FolderTree, Folder, FolderPlus, Edit, Trash2, Search } from 'lucide-react'
+import { Upload, Globe, Mail, DollarSign, FolderTree, Folder, FolderPlus, Edit, Trash2, Search, ShieldCheck } from 'lucide-react'
 
 // Define interfaces for proper typing
 interface Category {
@@ -587,12 +588,13 @@ export default function AdminSettings() {
       <h1 className="text-3xl font-bold mb-6">⚙️ Admin Settings</h1>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="branding">🎨 Branding</TabsTrigger>
           <TabsTrigger value="site">🌐 Site Info</TabsTrigger>
           <TabsTrigger value="contact">📧 Contact</TabsTrigger>
-          <TabsTrigger value="commerce">💰 E-commerce</TabsTrigger>
-          <TabsTrigger value="categories">📂 Categories</TabsTrigger>
+          <TabsTrigger value="security">🔒 Security</TabsTrigger>
+          {/*<TabsTrigger value="commerce">💰 E-commerce</TabsTrigger>*/}
+          {/*<TabsTrigger value="categories">📂 Categories</TabsTrigger>*/}
         </TabsList>
 
         {/* Branding Tab */}
@@ -818,6 +820,29 @@ export default function AdminSettings() {
           </Card>
         </TabsContent>
 
+        {/* Security Tab */}
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5" />
+                Security Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Label>Admin Password</Label>
+                <p className="text-sm text-gray-500">
+                  Change the administrator password.
+                </p>
+                <Button asChild>
+                  <Link href="/admin/settings/password">Change Password</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* E-commerce Tab */}
         <TabsContent value="commerce">
           <Card>
@@ -898,7 +923,7 @@ export default function AdminSettings() {
         </TabsContent>
 
         {/* Categories Tab */}
-        <TabsContent value="categories">
+        <TabsContent value="categories"> {/* Categories Tab */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
