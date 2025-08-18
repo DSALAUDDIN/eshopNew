@@ -37,33 +37,44 @@ export async function getProducts(options: {
         }
     }
 
-    const query = db.select().from(products).where(and(...conditions));
+    const queryOptions = {
+        where: and(...conditions),
+        with: {
+            category: true,
+            subcategory: true,
+        },
+        orderBy: [] as any,
+        limit: options.limit,
+    };
 
     switch (options.sort) {
         case 'price-asc':
-            query.orderBy(asc(products.price));
+            queryOptions.orderBy.push(asc(products.price));
             break;
         case 'price-desc':
-            query.orderBy(desc(products.price));
+            queryOptions.orderBy.push(desc(products.price));
             break;
         case 'name-asc':
-            query.orderBy(asc(products.name));
+            queryOptions.orderBy.push(asc(products.name));
             break;
         case 'newest':
         default:
-            query.orderBy(desc(products.createdAt));
+            queryOptions.orderBy.push(desc(products.createdAt));
             break;
     }
 
-    if (options.limit) {
-        query.limit(options.limit);
-    }
+    const data = await db.query.products.findMany(queryOptions);
 
-    const data = await query;
-    return data.map(product => ({
-        ...product,
-        images: product.images ? JSON.parse(product.images) : [],
-    }));
+    return data.map(product => {
+        const parsedImages = product.images ? JSON.parse(product.images) : [];
+        return {
+            ...product,
+            images: parsedImages,
+            image: parsedImages[0] || '/placeholder.svg',
+            category: product.category?.name || 'N/A',
+            subcategory: product.subcategory?.name || 'N/A',
+        };
+    });
 }
 
 export async function getProductById(id: string) {
@@ -71,6 +82,7 @@ export async function getProductById(id: string) {
         where: eq(products.id, id),
         with: {
             category: true,
+            subcategory: true,
             reviews: {
                 where: eq(reviews.isApproved, true),
                 orderBy: [desc(reviews.createdAt)],
@@ -80,9 +92,13 @@ export async function getProductById(id: string) {
 
     if (!productResult) return null;
 
+    const parsedImages = productResult.images ? JSON.parse(productResult.images) : [];
     return {
         ...productResult,
-        images: productResult.images ? JSON.parse(productResult.images) : [],
+        images: parsedImages,
+        image: parsedImages[0] || '/placeholder.svg',
+        category: productResult.category?.name || 'N/A',
+        subcategory: productResult.subcategory?.name || 'N/A',
     };
 }
 
@@ -94,10 +110,14 @@ export async function getRelatedProducts(categoryId: string, productId: string, 
         .orderBy(desc(products.createdAt))
         .limit(limit);
 
-    return related.map(product => ({
-        ...product,
-        images: product.images ? JSON.parse(product.images) : [],
-    }));
+    return related.map(product => {
+        const parsedImages = product.images ? JSON.parse(product.images) : [];
+        return {
+            ...product,
+            images: parsedImages,
+            image: parsedImages[0] || '/placeholder.svg',
+        };
+    });
 }
 
 export async function getCategoryDetails(slug: string) {
