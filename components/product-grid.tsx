@@ -15,106 +15,82 @@ interface ProductGridProps {
 export function ProductGrid({ products, title, onViewDetails }: ProductGridProps) {
   const { toggleFavorite, isFavorite } = useStore()
 
-  const getProductImage = (product: Product): string => {
+  const getProductImage = (product: Product) => {
     try {
-      const raw: unknown = (product as any)?.images
-      if (Array.isArray(raw) && raw.length) return String(raw[0])
-
-      if (typeof raw === "string") {
-        try {
-          const parsed = JSON.parse(raw)
-          if (Array.isArray(parsed) && parsed.length) return String(parsed[0])
-        } catch {
-          const csv = raw.split(",").map(s => s.trim()).filter(Boolean)
-          if (csv.length) return csv[0]
-        }
+      if (typeof product.images === 'string') {
+        const parsedImages = JSON.parse(product.images)
+        return parsedImages[0] || product.image || '/placeholder.svg'
+      } else if (Array.isArray(product.images) && product.images.length > 0) {
+        return product.images[0] || '/placeholder.svg'
+      } else {
+        return product.image || '/placeholder.svg'
       }
-
-      if ((product as any)?.image) return String((product as any).image)
-      return "/placeholder.svg"
-    } catch {
-      return "/placeholder.svg"
+    } catch (error) {
+      return product.image || '/placeholder.svg'
     }
   }
 
   return (
-      <section id="products" className="container mx-auto px-4 py-8 md:py-12">
-        {title && (
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12 text-[hsl(var(--primary))] font-brandon">
-              {title}
-            </h2>
-        )}
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-          {products.map((product, idx) => {
-            const img = getProductImage(product)
-            const pid = String(product.id)
-
-            return (
-                <div
-                    key={pid}
-                    className="text-center group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4 border border-gray-100"
-                >
-                  <div className="relative mb-3 md:mb-4">
-                    {(product as any)?.isNew && (
-                        <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-[hsl(var(--primary))] text-white px-1 md:px-2 py-1 text-xs rounded-full z-10 font-semibold shadow-md font-brandon">
-                    NEW!
-                  </span>
-                    )}
-                    {(product as any)?.isSale && (
-                        <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-gradient-to-r from-red-600 to-red-500 text-white px-1 md:px-2 py-1 text-xs rounded-full z-10 font-semibold shadow-md font-brandon">
-                    SALE!
-                  </span>
-                    )}
-
-                    <button
-                        onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-1 md:top-2 right-1 md:right-2 z-10 p-1 md:p-2 rounded-full bg-white hover:bg-gray-50 transition-colors shadow-md"
-                        aria-label="Toggle favorite"
-                        type="button"
-                    >
-                      <Heart
-                          className={`w-4 h-4 md:w-5 md:h-5 ${
-                              isFavorite(product.id)
-                                  ? "fill-[hsl(var(--primary))] text-[hsl(var(--primary))]"
-                                  : "text-gray-400 hover:text-[hsl(var(--primary))]"
-                          } transition-colors`}
-                      />
-                    </button>
-
-                    {/* Square, fully responsive image area */}
-                    <div
-                        className="relative w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden cursor-pointer"
-                        onClick={() => onViewDetails(product)}
-                    >
-                      <Image
-                          src={img || "/placeholder.svg"}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                          className="object-contain transition-transform duration-300"
-                          priority={idx < 2} // a couple of top images get priority
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
-                    </div>
-                  </div>
-
-                  <h3 className="text-xs md:text-sm font-semibold mb-1 md:mb-2 text-gray-800 line-clamp-2 font-brandon">
-                    {product.name}
-                  </h3>
-
-                  <div className="space-y-2">
-                    <Button
-                        className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] text-white text-xs md:text-sm px-3 md:px-6 py-1 md:py-2 w-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 border-0 font-brandon"
-                        onClick={() => onViewDetails(product)}
-                    >
-                      VIEW DETAILS
-                    </Button>
-                  </div>
-                </div>
-            )
-          })}
-        </div>
-      </section>
+    <section id="products" className="container mx-auto px-4 py-8 md:py-12">
+      {title && (
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12 text-[hsl(var(--primary))] font-brandon">
+          {title}
+        </h2>
+      )}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="text-center group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4 border border-gray-100"
+          >
+            <div className="relative mb-3 md:mb-4">
+              {product.isNew && (
+                <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-[hsl(var(--primary))] text-white px-1 md:px-2 py-1 text-xs rounded-full z-10 font-semibold shadow-md font-brandon">
+                  NEW!
+                </span>
+              )}
+              {product.isSale && (
+                <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-gradient-to-r from-red-600 to-red-500 text-white px-1 md:px-2 py-1 text-xs rounded-full z-10 font-semibold shadow-md font-brandon">
+                  SALE!
+                </span>
+              )}
+              <button
+                onClick={() => toggleFavorite(product.id)}
+                className="absolute top-1 md:top-2 right-1 md:right-2 z-10 p-1 md:p-2 rounded-full bg-white hover:bg-gray-50 transition-colors shadow-md"
+              >
+                <Heart
+                  className={`w-4 h-4 md:w-5 md:h-5 ${
+                    isFavorite(product.id) ? "fill-[hsl(var(--primary))] text-[hsl(var(--primary))]" : "text-gray-400 hover:text-[hsl(var(--primary))]"
+                  } transition-colors`}
+                />
+              </button>
+              <div
+                className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden cursor-pointer"
+                onClick={() => onViewDetails(product)}
+              >
+                <Image
+                  src={getProductImage(product)}
+                  alt={product.name}
+                  width={300}
+                  height={300}
+                  className="w-full h-40 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300 border-0"
+                />
+              </div>
+            </div>
+            <h3 className="text-xs md:text-sm font-semibold mb-1 md:mb-2 text-gray-800 line-clamp-2 font-brandon">
+              {product.name}
+            </h3>
+            <div className="space-y-2">
+              <Button
+                className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] text-white text-xs md:text-sm px-3 md:px-6 py-1 md:py-2 w-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 border-0 font-brandon"
+                onClick={() => onViewDetails(product)}
+              >
+                VIEW DETAILS
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }

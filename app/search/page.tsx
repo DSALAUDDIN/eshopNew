@@ -18,17 +18,27 @@ import {
 } from '@/components/ui/select'
 import type { Product } from '@/lib/types'
 
+type SortBy = 'relevance' | 'price-low' | 'price-high' | 'name' | 'newest'
+
 /** If your Product doesn't include these fields, we extend it here (non-breaking). */
 type ProductExt = Product & {
-  description?: string
-  sku?: string
-  category?: { id: string | number; name: string }
+  categoryId?: string | number
   createdAt?: string | number | Date
 }
 
 interface CategoryItem {
   id: string | number
   name: string
+}
+
+function parsePriceRange(range: string): [number, number | null] {
+  if (!range || range === 'all') return [0, null]
+  if (range.includes('-')) {
+    const [min, max] = range.split('-').map((v) => Number(v))
+    return [isFinite(min) ? min : 0, isFinite(max) ? max : null]
+  }
+  const min = Number(range)
+  return [isFinite(min) ? min : 0, null]
 }
 
 export default function SearchPage() {
@@ -54,16 +64,19 @@ export default function SearchPage() {
   }
 
   const [searchQuery, setSearchQuery] = useState<string>(queryFromUrl)
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('') // '' | 'all' | id
+  const [priceRange, setPriceRange] = useState<string>('')             // '' | 'all' | "min-max" | "5000"
+  const [sortBy, setSortBy] = useState<SortBy>('relevance')
 
   const products = storeProducts ?? []
   const categories = storeCategories ?? []
 
-  const handleViewDetails = (product: ProductExt) => {
+  const handleViewDetails = (product: Product) => {
     router.push(`/product/${product.id}`)
   }
 
-  const handleAddToCart = (product: ProductExt, _event?: React.MouseEvent<HTMLButtonElement>) => {
+  // Match ProductGrid’s (product, event?) signature
+  const handleAddToCart = (product: Product, _event?: React.MouseEvent<HTMLButtonElement>) => {
     addToCart(product, 1)
   }
 
@@ -78,31 +91,68 @@ export default function SearchPage() {
   }, [queryFromUrl])
 
   const filteredProducts: ProductExt[] = useMemo(() => {
-    let result: ProductExt[] = [...products]
+    let result = [...products]
 
     // Text search
     const q = searchQuery.trim().toLowerCase()
     if (q) {
       const terms = q.split(/\s+/)
       result = result.filter((p) => {
-        const searchable = `${p.name ?? ''} ${p.description ?? ''} ${p.sku ?? ''}`.toLowerCase()
+        const searchable = `${p.name ?? ''} ${(p as any).description ?? ''} ${(p as any).sku ?? ''}`.toLowerCase()
         return terms.some((t) => searchable.includes(t))
       })
     }
 
     // Category filter
     if (selectedCategory && selectedCategory !== 'all') {
-      result = result.filter((p) => String(p.category?.id ?? '') === String(selectedCategory))
+      result = result.filter((p) => String(p.categoryId ?? '') === String(selectedCategory))
+    }
+
+    // Price range filter
+    if (priceRange && priceRange !== 'all') {
+      const [min, max] = parsePriceRange(priceRange)
+      result = result.filter((p) => {
+        const price = Number((p as any).price || 0)
+        return max !== null ? price >= min && price <= max : price >= min
+      })
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'price-low':
+        result.sort((a, b) => Number((a as any).price) - Number((b as any).price))
+        break
+      case 'price-high':
+        result.sort((a, b) => Number((b as any).price) - Number((a as any).price))
+        break
+      case 'name':
+        result.sort((a, b) => String(a.name ?? '').localeCompare(String(b.name ?? '')))
+        break
+      case 'newest':
+        result.sort((a, b) => {
+          const at = new Date(a.createdAt ?? 0).getTime()
+          const bt = new Date(b.createdAt ?? 0).getTime()
+          return bt - at
+        })
+        break
+      case 'relevance':
+      default:
+        break
     }
 
     return result
-  }, [products, searchQuery, selectedCategory])
+  }, [products, searchQuery, selectedCategory, priceRange, sortBy])
 
   const clearFilters = () => {
     setSelectedCategory('all')
+    setPriceRange('all')
+    setSortBy('relevance')
   }
 
-  const hasActiveFilters = selectedCategory && selectedCategory !== 'all'
+  const hasActiveFilters =
+      ((selectedCategory && selectedCategory !== 'all') ||
+          (priceRange && priceRange !== 'all') ||
+          sortBy !== 'relevance')
 
   if (loading) {
     return (
@@ -167,7 +217,7 @@ export default function SearchPage() {
           {/* Filters */}
           <Card className="mb-8">
             <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Category */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -184,6 +234,45 @@ export default function SearchPage() {
                             {category.name}
                           </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Price Range */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Price Range
+                  </label>
+                  <Select value={priceRange} onValueChange={(v: string) => setPriceRange(v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Prices" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Prices</SelectItem>
+                      <SelectItem value="0-500">Under ৳500</SelectItem>
+                      <SelectItem value="500-1000">৳500 - ৳1,000</SelectItem>
+                      <SelectItem value="1000-2000">৳1,000 - ৳2,000</SelectItem>
+                      <SelectItem value="2000-5000">৳2,000 - ৳5,000</SelectItem>
+                      <SelectItem value="5000">Above ৳5,000</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Sort By */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Sort By
+                  </label>
+                  <Select value={sortBy} onValueChange={(v: SortBy) => setSortBy(v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="name">Name A-Z</SelectItem>
+                      <SelectItem value="newest">Newest First</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -217,6 +306,33 @@ export default function SearchPage() {
                           </button>
                         </Badge>
                     )}
+                    {priceRange && priceRange !== 'all' && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          Price: {priceRange === '5000' ? 'Above ৳5,000' : `৳${priceRange.replace('-', ' - ৳')}`}
+                          <button
+                              type="button"
+                              onClick={() => setPriceRange('all')}
+                              aria-label="Clear price filter"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                    )}
+                    {sortBy !== 'relevance' && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          Sort: {sortBy === 'price-low' ? 'Price Low–High'
+                            : sortBy === 'price-high' ? 'Price High–Low'
+                                : sortBy === 'name' ? 'Name A–Z'
+                                    : 'Newest First'}
+                          <button
+                              type="button"
+                              onClick={() => setSortBy('relevance')}
+                              aria-label="Clear sort"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                    )}
                   </div>
               )}
             </CardContent>
@@ -225,10 +341,10 @@ export default function SearchPage() {
           {/* Products Grid */}
           {filteredProducts.length > 0 ? (
               <ProductGrid
-                  products={filteredProducts}
+                  products={filteredProducts}                           // Product[]
                   title={searchQuery ? `Search Results for "${searchQuery}"` : 'Products'}
-                  onViewDetails={handleViewDetails}
-                  onAddToCart={handleAddToCart}
+                  onViewDetails={handleViewDetails}                     // (product: Product) => void
+                  onAddToCart={handleAddToCart}                         // (product: Product, event?) => void
               />
           ) : (
               <div className="text-center py-12">
