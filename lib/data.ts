@@ -14,7 +14,7 @@ export async function getProducts(options: {
     const conditions = [];
 
     if (options.category && options.category !== 'all') {
-        const categoryData = await db.query.categories.findFirst({ where: eq(sql.lower(categories.slug), options.category.toLowerCase()) });
+        const categoryData = await db.query.categories.findFirst({ where: eq(sql`lower(${categories.slug})`, options.category.toLowerCase()) });
 
         if (!categoryData) {
             return []; // Category not found, no products to return
@@ -25,7 +25,7 @@ export async function getProducts(options: {
         if (options.subcategory) {
             const subcategoryData = await db.query.subcategories.findFirst({
                 where: and(
-                    eq(sql.lower(subcategories.slug), options.subcategory.toLowerCase()),
+                    eq(sql`lower(${subcategories.slug})`, options.subcategory.toLowerCase()),
                     eq(subcategories.categoryId, categoryData.id)
                 )
             });
@@ -36,7 +36,7 @@ export async function getProducts(options: {
             conditions.push(eq(products.subcategoryId, subcategoryData.id));
         }
     } else if (options.subcategory) {
-        const subcategoryData = await db.query.subcategories.findFirst({ where: eq(sql.lower(subcategories.slug), options.subcategory.toLowerCase()) });
+        const subcategoryData = await db.query.subcategories.findFirst({ where: eq(sql`lower(${subcategories.slug})`, options.subcategory.toLowerCase()) });
         if (!subcategoryData) {
             return [];
         }
@@ -128,7 +128,7 @@ export async function getCategoryDetails(slug: string) {
     }
 
     const categoryResult = await db.query.categories.findFirst({
-        where: eq(sql.lower(categories.slug), slug.toLowerCase()),
+        where: eq(sql`lower(${categories.slug})`, slug.toLowerCase()),
     });
 
     if (!categoryResult) {
