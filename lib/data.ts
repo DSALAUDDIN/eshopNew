@@ -113,18 +113,25 @@ export async function getCategoryDetails(slug: string) {
 
     const categoryResult = await db.query.categories.findFirst({
         where: eq(categories.slug, slug),
-        with: {
-            subcategories: {
-                columns: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                }
-            }
-        }
     });
 
-    return categoryResult || null;
+    if (!categoryResult) {
+        return null;
+    }
+
+    const categorySubcategories = await db
+        .select({
+            id: subcategories.id,
+            name: subcategories.name,
+            slug: subcategories.slug,
+        })
+        .from(subcategories)
+        .where(eq(subcategories.categoryId, categoryResult.id));
+
+    return {
+        ...categoryResult,
+        subcategories: categorySubcategories,
+    };
 }
 
 export async function getReviews(options: { productId?: string; limit?: number } = {}) {
