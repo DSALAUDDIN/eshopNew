@@ -594,7 +594,7 @@ export default function AdminSettings() {
           <TabsTrigger value="contact">📧 Contact</TabsTrigger>
           <TabsTrigger value="security">🔒 Security</TabsTrigger>
           {/*<TabsTrigger value="commerce">💰 E-commerce</TabsTrigger>*/}
-          {/*<TabsTrigger value="categories">📂 Categories</TabsTrigger>*/}
+          <TabsTrigger value="categories">📂 Categories</TabsTrigger>
         </TabsList>
 
         {/* Branding Tab */}
