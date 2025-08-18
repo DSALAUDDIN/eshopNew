@@ -8,13 +8,15 @@ import type { Product } from "@/lib/types"
 
 interface ProductGridProps {
   products: Product[]
-  title?: string
+  title?: string // Make title optional
   onViewDetails: (product: Product) => void
+  onAddToCart: (product: Product, event?: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-export function ProductGrid({ products, title, onViewDetails }: ProductGridProps) {
+export function ProductGrid({ products, title, onViewDetails, onAddToCart }: ProductGridProps) {
   const { toggleFavorite, isFavorite } = useStore()
 
+  // Helper function to get the first product image
   const getProductImage = (product: Product) => {
     try {
       if (typeof product.images === 'string') {
@@ -80,6 +82,16 @@ export function ProductGrid({ products, title, onViewDetails }: ProductGridProps
             <h3 className="text-xs md:text-sm font-semibold mb-1 md:mb-2 text-gray-800 line-clamp-2 font-brandon">
               {product.name}
             </h3>
+            {/*<div className="flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-4">*/}
+            {/*  <span className="text-xs md:text-sm text-[hsl(var(--primary))] font-bold font-brandon">*/}
+            {/*    ৳{product.price.toLocaleString('en-BD')}*/}
+            {/*  </span>*/}
+            {/*  {product.originalPrice && (*/}
+            {/*    <span className="text-xs md:text-sm text-gray-500 line-through font-brandon">*/}
+            {/*      ৳{product.originalPrice.toLocaleString('en-BD')}*/}
+            {/*    </span>*/}
+            {/*  )}*/}
+            {/*</div>*/}
             <div className="space-y-2">
               <Button
                 className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] text-white text-xs md:text-sm px-3 md:px-6 py-1 md:py-2 w-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 border-0 font-brandon"
@@ -87,6 +99,12 @@ export function ProductGrid({ products, title, onViewDetails }: ProductGridProps
               >
                 VIEW DETAILS
               </Button>
+              {/*<Button*/}
+              {/*  className="bg-gray-800 hover:bg-gray-900 text-white text-xs md:text-sm px-3 md:px-6 py-1 md:py-2 w-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 border-0 font-brandon"*/}
+              {/*  onClick={(e) => onAddToCart(product, e)}*/}
+              {/*>*/}
+              {/*  ADD TO CART*/}
+              {/*</Button>*/}
             </div>
           </div>
         ))}
