@@ -21,7 +21,7 @@ export default async function HomePage() {
                 newProducts={newProducts}
             />
             <Collections />
-            <CustomerReviews reviews={reviews} />
+            <CustomerReviews reviews={reviews || []} />
         </main>
     )
 }
