@@ -12,6 +12,7 @@ export async function getProducts(options: {
     new?: boolean;
     sort?: string;
 } = {}) {
+    console.log('[getProducts] Fetching products with options:', options);
     const conditions = [];
 
     if (options.featured) {
@@ -25,16 +26,24 @@ export async function getProducts(options: {
     }
 
     if (options.category && options.category !== 'all') {
+        console.log(`[getProducts] Filtering by category: ${options.category}`);
         const categoryData = await db.query.categories.findFirst({ where: like(categories.slug, options.category) });
         if (categoryData) {
+            console.log('[getProducts] Found category data:', categoryData);
             conditions.push(eq(products.categoryId, categoryData.id));
+        } else {
+            console.log('[getProducts] No category found for slug:', options.category);
         }
     }
 
     if (options.subcategory) {
+        console.log(`[getProducts] Filtering by subcategory: ${options.subcategory}`);
         const subcategoryData = await db.query.subcategories.findFirst({ where: like(subcategories.slug, options.subcategory) });
         if (subcategoryData) {
+            console.log('[getProducts] Found subcategory data:', subcategoryData);
             conditions.push(eq(products.subcategoryId, subcategoryData.id));
+        } else {
+            console.log('[getProducts] No subcategory found for slug:', options.subcategory);
         }
     }
 
@@ -64,7 +73,9 @@ export async function getProducts(options: {
             break;
     }
 
+    console.log('[getProducts] Executing query with conditions:', conditions);
     const data = await db.query.products.findMany(queryOptions);
+    console.log(`[getProducts] Found ${data.length} products.`);
 
     return data.map((p): Product => {
         const { category, subcategory, ...rest } = p;
