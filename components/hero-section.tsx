@@ -64,7 +64,7 @@ export function HeroSection(): JSX.Element {
       <section className="relative">
         <div className="bg-primary text-white relative overflow-hidden">
           <div
-            className="h-[300px] md:h-[500px] bg-cover bg-center relative flex items-center justify-center"
+            className="h-48 md:h-80 bg-cover bg-center relative flex items-center justify-center"
             style={backgroundStyle}
           >
             <div className="absolute inset-0 bg-black/50"></div>
@@ -90,7 +90,7 @@ export function HeroSection(): JSX.Element {
         <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-transparent z-10"></div>
 
         {/* Carousel Container */}
-        <div className="relative h-[300px] md:h-[500px] overflow-hidden">
+        <div className="relative h-48 md:h-80 overflow-hidden">
           {/* Images */}
           <div
             className="flex transition-transform duration-500 ease-in-out h-full"

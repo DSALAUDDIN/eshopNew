@@ -144,16 +144,16 @@ export default function ProductCardSmall({ product }: ProductCardSmallProps) {
           )}
 
           {/* Price */}
-          {/*<div className="flex items-center gap-2">*/}
-          {/*  <span className="font-bold text-gray-900">*/}
-          {/*    {formatPrice(product.price)}*/}
-          {/*  </span>*/}
-          {/*  {product.originalPrice && (*/}
-          {/*    <span className="text-sm text-gray-500 line-through">*/}
-          {/*      {formatPrice(product.originalPrice)}*/}
-          {/*    </span>*/}
-          {/*  )}*/}
-          {/*</div>*/}
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-gray-900">
+              {formatPrice(product.price)}
+            </span>
+            {product.originalPrice && (
+              <span className="text-sm text-gray-500 line-through">
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </Link>

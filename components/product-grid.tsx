@@ -82,16 +82,16 @@ export function ProductGrid({ products, title, onViewDetails, onAddToCart }: Pro
             <h3 className="text-xs md:text-sm font-semibold mb-1 md:mb-2 text-gray-800 line-clamp-2 font-brandon">
               {product.name}
             </h3>
-            {/*<div className="flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-4">*/}
-            {/*  <span className="text-xs md:text-sm text-[hsl(var(--primary))] font-bold font-brandon">*/}
-            {/*    ৳{product.price.toLocaleString('en-BD')}*/}
-            {/*  </span>*/}
-            {/*  {product.originalPrice && (*/}
-            {/*    <span className="text-xs md:text-sm text-gray-500 line-through font-brandon">*/}
-            {/*      ৳{product.originalPrice.toLocaleString('en-BD')}*/}
-            {/*    </span>*/}
-            {/*  )}*/}
-            {/*</div>*/}
+            <div className="flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-4">
+              <span className="text-xs md:text-sm text-[hsl(var(--primary))] font-bold font-brandon">
+                ৳{product.price.toLocaleString('en-BD')}
+              </span>
+              {product.originalPrice && (
+                <span className="text-xs md:text-sm text-gray-500 line-through font-brandon">
+                  ৳{product.originalPrice.toLocaleString('en-BD')}
+                </span>
+              )}
+            </div>
             <div className="space-y-2">
               <Button
                 className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] text-white text-xs md:text-sm px-3 md:px-6 py-1 md:py-2 w-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 border-0 font-brandon"

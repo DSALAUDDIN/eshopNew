@@ -30,32 +30,6 @@ export function getTokenFromRequest(request: NextRequest): string | null {
   return null
 }
 
-interface DecodedToken {
-    userId: string;
-    email: string;
-    role: string;
-    iat: number;
-    exp: number;
-}
-
-export async function verifyAdmin(request: NextRequest): Promise<DecodedToken | null> {
-    const token = getTokenFromRequest(request);
-    if (!token) {
-        return null;
-    }
-
-    const decodedToken = verifyToken(token) as DecodedToken | null;
-    if (!decodedToken) {
-        return null;
-    }
-
-    if (decodedToken.role === 'ADMIN' || decodedToken.role === 'SUPER_ADMIN') {
-        return decodedToken;
-    }
-
-    return null;
-}
-
 export function generateOrderNumber(): string {
   const timestamp = Date.now().toString()
   const random = Math.random().toString(36).substring(2, 8).toUpperCase()
