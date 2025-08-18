@@ -1,6 +1,6 @@
 import { db } from '@/lib/prisma';
 import { products, categories, subcategories, reviews } from '@/lib/db/schema';
-import { eq, and, desc, asc, not } from 'drizzle-orm';
+import { eq, and, desc, asc, not, like } from 'drizzle-orm';
 
 export async function getProducts(options: {
     featured?: boolean;
@@ -24,14 +24,14 @@ export async function getProducts(options: {
     }
 
     if (options.category && options.category !== 'all') {
-        const categoryData = await db.query.categories.findFirst({ where: eq(categories.slug, options.category) });
+        const categoryData = await db.query.categories.findFirst({ where: like(categories.slug, options.category) });
         if (categoryData) {
             conditions.push(eq(products.categoryId, categoryData.id));
         }
     }
 
     if (options.subcategory) {
-        const subcategoryData = await db.query.subcategories.findFirst({ where: eq(subcategories.slug, options.subcategory) });
+        const subcategoryData = await db.query.subcategories.findFirst({ where: like(subcategories.slug, options.subcategory) });
         if (subcategoryData) {
             conditions.push(eq(products.subcategoryId, subcategoryData.id));
         }
@@ -112,7 +112,7 @@ export async function getCategoryDetails(slug: string) {
     }
 
     const categoryResult = await db.query.categories.findFirst({
-        where: eq(categories.slug, slug),
+        where: like(categories.slug, slug),
         with: {
             subcategories: {
                 columns: {
