@@ -7,17 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Star, Heart, Share2, Home } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import ProductCardSmall from '@/components/product-card-small'
 import { ReviewForm } from '@/components/review-form'
 import { CustomerReviews } from '@/components/customer-reviews'
 import type { Product, Review } from '@/lib/types'
+import { ImageWithLoader } from '@/components/ui/image-with-loader'
 
 interface ProductDetailsProps {
-    product: Product;
-    relatedProducts: Product[];
-    bestSellingProducts: Product[];
+    product: Product
+    relatedProducts: Product[]
+    bestSellingProducts: Product[]
 }
 
 function isCategoryObject(category: any): category is { slug: string; name: string } {
@@ -26,53 +26,53 @@ function isCategoryObject(category: any): category is { slug: string; name: stri
         category !== null &&
         typeof category.slug === 'string' &&
         typeof category.name === 'string'
-    );
+    )
 }
 
 export function ProductDetails({ product, relatedProducts, bestSellingProducts }: ProductDetailsProps) {
-    const router = useRouter();
-    const { toggleFavorite, isFavorite } = useStore();
-    const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+    const router = useRouter()
+    const { toggleFavorite, isFavorite } = useStore()
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
 
     // normalize images
     const images = useMemo<string[]>(() => {
         try {
-            if (!product) return ['/placeholder.jpg'];
-            let imgs = (product as any).images;
-            if (Array.isArray(imgs)) return imgs.map(String);
+            if (!product) return ['/placeholder.jpg']
+            let imgs = (product as any).images
+            if (Array.isArray(imgs)) return imgs.map(String)
             if (typeof imgs === 'string') {
                 try {
-                    const parsed = JSON.parse(imgs);
-                    if (Array.isArray(parsed)) return parsed.map(String);
+                    const parsed = JSON.parse(imgs)
+                    if (Array.isArray(parsed)) return parsed.map(String)
                 } catch {
-                    const csvSplit = imgs.split(',').map((s: string) => s.trim()).filter(Boolean);
-                    if (csvSplit.length) return csvSplit;
+                    const csvSplit = imgs.split(',').map((s: string) => s.trim()).filter(Boolean)
+                    if (csvSplit.length) return csvSplit
                 }
             }
-            return [product.image || '/placeholder.jpg'];
+            return [product.image || '/placeholder.jpg']
         } catch {
-            return [product?.image || '/placeholder.jpg'];
+            return [product?.image || '/placeholder.jpg']
         }
-    }, [product]);
+    }, [product])
 
     // average rating
     const averageRating = useMemo<number>(() => {
-        if (!Array.isArray(product?.reviews) || product.reviews.length === 0) return 0;
-        const sum = product.reviews.reduce((acc: number, r: Review) => acc + (r?.rating ?? 0), 0);
-        return sum / product.reviews.length;
-    }, [product]);
+        if (!Array.isArray(product?.reviews) || product.reviews.length === 0) return 0
+        const sum = product.reviews.reduce((acc: number, r: Review) => acc + (r?.rating ?? 0), 0)
+        return sum / product.reviews.length
+    }, [product])
 
     const handleToggleFavorite = () => {
-        if (product) toggleFavorite(product.id);
-    };
+        if (product) toggleFavorite(product.id)
+    }
 
     const handleShare = async () => {
         if (!product) {
-            alert('Product data not loaded yet. Please try again.');
-            return;
+            alert('Product data not loaded yet. Please try again.')
+            return
         }
-        const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-        const shareData = { title: product.name, text: `Check out this ${product.name}`, url: currentUrl };
+        const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
+        const shareData = { title: product.name, text: `Check out this ${product.name}`, url: currentUrl }
         try {
             if (
                 typeof navigator !== 'undefined' &&
@@ -80,24 +80,24 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
                 typeof (navigator as any).canShare === 'function' &&
                 (navigator as any).canShare(shareData)
             ) {
-                await (navigator as any).share(shareData);
+                await (navigator as any).share(shareData)
             } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                await navigator.clipboard.writeText(currentUrl);
-                alert('Product link copied to clipboard!');
+                await navigator.clipboard.writeText(currentUrl)
+                alert('Product link copied to clipboard!')
             } else {
-                alert('Sharing not supported. Please copy the link manually.');
+                alert('Sharing not supported. Please copy the link manually.')
             }
         } catch (err) {
-            console.error('Share failed:', err);
-            alert('Failed to share. Please copy the link manually.');
+            console.error('Share failed:', err)
+            alert('Failed to share. Please copy the link manually.')
         }
-    };
+    }
 
     // Render stars
     const renderStars = (rating: number) =>
         Array.from({ length: 5 }, (_, i) => (
             <Star key={i} className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-        ));
+        ))
 
     return (
         <div className="min-h-screen bg-white">
@@ -127,17 +127,20 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
 
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Product Images */}
+                    {/* Product Images (UPDATED: responsive, no crop on mobile) */}
                     <div className="space-y-4">
-                        <div className="aspect-square rounded-xl overflow-hidden bg-gray-50 border">
-                            <Image
-                                src={images[selectedImageIndex] || '/placeholder.jpg'}
-                                alt={product.name}
-                                width={600}
-                                height={600}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                priority
-                            />
+                        <div className="rounded-xl border bg-white p-2">
+                            {/* Mobile/tablet use viewport-based heights; desktop goes square */}
+                            <div className="w-full h-[78vw] sm:h-[60vw] md:h-[50vw] lg:aspect-square lg:h-auto flex items-center justify-center">
+                                <ImageWithLoader
+                                    src={images[selectedImageIndex] || '/placeholder.jpg'}
+                                    alt={product.name}
+                                    width={1200}
+                                    height={1200}
+                                    className="max-h-full max-w-full object-contain"
+                                    priority
+                                />
+                            </div>
                         </div>
 
                         {images.length > 1 && (
@@ -154,12 +157,12 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
                                         aria-label={`Select image ${index + 1}`}
                                         type="button"
                                     >
-                                        <Image
+                                        <ImageWithLoader
                                             src={image || '/placeholder.jpg'}
                                             alt={`${product.name} ${index + 1}`}
-                                            width={150}
-                                            height={150}
-                                            className="w-full h-full object-cover"
+                                            width={200}
+                                            height={200}
+                                            className="h-full w-full object-cover"
                                         />
                                     </button>
                                 ))}
@@ -177,9 +180,7 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
                                         {product.isNew && (
                                             <Badge className="bg-green-100 text-green-800 hover:bg-green-100">New</Badge>
                                         )}
-                                        {product.isSale && (
-                                            <Badge variant="destructive">Sale</Badge>
-                                        )}
+                                        {product.isSale && <Badge variant="destructive">Sale</Badge>}
                                         {product.isFeatured && (
                                             <Badge variant="outline" className="border-blue-200 text-blue-800">Featured</Badge>
                                         )}
@@ -239,7 +240,7 @@ export function ProductDetails({ product, relatedProducts, bestSellingProducts }
                             <h2 className="text-2xl font-bold text-gray-900 mb-8">
                                 Customer Reviews ({product.reviews?.length || 0})
                             </h2>
-                            <CustomerReviews reviews={product.reviews as Review[] || []} />
+                            <CustomerReviews reviews={(product.reviews as Review[]) || []} />
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900 mb-6">Write a Review</h3>
