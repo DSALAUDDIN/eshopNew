@@ -10,7 +10,10 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [filteredProducts, setFilteredProducts] = useState(initialProducts)
+  // Remove filteredProducts state
+  // const [filteredProducts, setFilteredProducts] = useState(initialProducts)
+  // Use initialProducts directly
+  const products = initialProducts;
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest')
   const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || 'all')
 
@@ -18,7 +21,8 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
     const params = new URLSearchParams(searchParams.toString())
     params.set('sort', sortBy)
     params.set('subcategory', selectedSubcategory)
-    router.replace(`${window.location.pathname}?${params.toString()}`)
+    // Use router.push to trigger a server refresh
+    router.push(`${window.location.pathname}?${params.toString()}`)
   }, [sortBy, selectedSubcategory, router, searchParams])
 
   const handleViewDetails = (product: Product) => {
@@ -71,7 +75,7 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
           <div className="lg:w-3/4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <p className="text-gray-600">
-                Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+                Showing {products.length} {products.length === 1 ? 'product' : 'products'}
               </p>
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium">Sort by:</label>
@@ -89,9 +93,9 @@ export function CategoryView({ initialProducts, categoryDetails }: { initialProd
               </div>
             </div>
 
-            {filteredProducts.length > 0 ? (
+            {products.length > 0 ? (
               <ProductGrid
-                products={filteredProducts}
+                products={products}
                 onViewDetails={handleViewDetails}
               />
             ) : (
