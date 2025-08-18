@@ -1,5 +1,5 @@
 export interface Product {
-  id: string
+  id: number
   name: string
   price: number
   originalPrice?: number
@@ -21,7 +21,7 @@ export interface Product {
 }
 
 export interface Review {
-  id: string
+  id: number
   customerName: string
   rating: number
   title?: string

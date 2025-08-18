@@ -1,13 +1,12 @@
 export interface Product {
-  id: string
+  id: number
   name: string
-  slug: string
   price: number
   originalPrice?: number
   image: string
   images?: string[]
   category: string
-  subcategory: string
+  subcategory: string | { slug: string; name?: string; [key: string]: any }
   isNew: boolean
   isSale: boolean
   isFeatured?: boolean
@@ -22,7 +21,7 @@ export interface Product {
 }
 
 export interface Review {
-  id: string
+  id: string // <-- changed to string for consistency
   customerName: string
   rating: number
   title?: string

@@ -1,11 +1,7 @@
-// lib/data.ts
 import { db } from '@/lib/prisma';
 import { products, categories, subcategories, reviews } from '@/lib/db/schema';
-import { eq, and, desc, asc, not } from 'drizzle-orm';
-
-// Normalize any slug/query value to be safe across envs/collations
-const norm = (s?: string) =>
-    decodeURIComponent((s ?? '').toString()).trim().toLowerCase();
+import { eq, and, desc, asc, not, like } from 'drizzle-orm';
+import type { Product } from './types';
 
 export async function getProducts(options: {
     featured?: boolean;
@@ -16,36 +12,39 @@ export async function getProducts(options: {
     new?: boolean;
     sort?: string;
 } = {}) {
-    const conditions: any[] = [];
+    const conditions = [];
 
-    if (options.featured) conditions.push(eq(products.isFeatured, true));
-    if (options.sale) conditions.push(eq(products.isSale, true));
-    if (options.new) conditions.push(eq(products.isNew, true));
-
-    const catSlug = norm(options.category);
-    const subSlug = norm(options.subcategory);
-
-    if (catSlug && catSlug !== 'all') {
-        const categoryData = await db.query.categories.findFirst({
-            where: eq(categories.slug, catSlug),
-        });
-        if (categoryData) conditions.push(eq(products.categoryId, categoryData.id));
+    if (options.featured) {
+        conditions.push(eq(products.isFeatured, true));
+    }
+    if (options.sale) {
+        conditions.push(eq(products.isSale, true));
+    }
+    if (options.new) {
+        conditions.push(eq(products.isNew, true));
     }
 
-    if (subSlug) {
-        const subcategoryData = await db.query.subcategories.findFirst({
-            where: eq(subcategories.slug, subSlug),
-        });
-        if (subcategoryData) conditions.push(eq(products.subcategoryId, subcategoryData.id));
+    if (options.category && options.category !== 'all') {
+        const categoryData = await db.query.categories.findFirst({ where: like(categories.slug, options.category) });
+        if (categoryData) {
+            conditions.push(eq(products.categoryId, categoryData.id));
+        }
     }
 
-    const queryOptions: any = {
+    if (options.subcategory) {
+        const subcategoryData = await db.query.subcategories.findFirst({ where: like(subcategories.slug, options.subcategory) });
+        if (subcategoryData) {
+            conditions.push(eq(products.subcategoryId, subcategoryData.id));
+        }
+    }
+
+    const queryOptions = {
         where: and(...conditions),
         with: {
             category: true,
             subcategory: true,
         },
-        orderBy: [],
+        orderBy: [] as any,
         limit: options.limit,
     };
 
@@ -67,14 +66,15 @@ export async function getProducts(options: {
 
     const data = await db.query.products.findMany(queryOptions);
 
-    return data.map((product: any) => {
-        const parsedImages = product.images ? JSON.parse(product.images) : [];
+    return data.map((p): Product => {
+        const { category, subcategory, ...rest } = p;
+        const parsedImages = rest.images ? JSON.parse(rest.images) : [];
         return {
-            ...product,
+            ...rest,
             images: parsedImages,
             image: parsedImages[0] || '/placeholder.svg',
-            category: product.category?.name || 'N/A',
-            subcategory: product.subcategory?.name || 'N/A',
+            category: category?.name || 'N/A',
+            subcategory: subcategory?.name || 'N/A',
         };
     });
 }
@@ -88,43 +88,52 @@ export async function getProductById(id: string) {
             reviews: {
                 where: eq(reviews.isApproved, true),
                 orderBy: [desc(reviews.createdAt)],
-            },
-        },
+            }
+        }
     });
 
     if (!productResult) return null;
 
-    const parsedImages = productResult.images ? JSON.parse(productResult.images) : [];
+    const { category, subcategory, reviews: productReviews, ...rest } = productResult;
+    const parsedImages = rest.images ? JSON.parse(rest.images) : [];
+
     return {
-        ...productResult,
+        ...rest,
         images: parsedImages,
         image: parsedImages[0] || '/placeholder.svg',
-        category: productResult.category?.name || 'N/A',
-        subcategory: productResult.subcategory?.name || 'N/A',
+        category: category?.name || 'N/A',
+        subcategory: subcategory?.name || 'N/A',
+        reviews: productReviews,
     };
 }
 
 export async function getRelatedProducts(categoryId: string, productId: string, limit: number) {
-    const related = await db
-        .select()
-        .from(products)
-        .where(and(eq(products.categoryId, categoryId), not(eq(products.id, productId))))
-        .orderBy(desc(products.createdAt))
-        .limit(limit);
+    const related = await db.query.products.findMany({
+        where: and(eq(products.categoryId, categoryId), not(eq(products.id, productId))),
+        with: {
+            category: true,
+            subcategory: true,
+        },
+        orderBy: desc(products.createdAt),
+        limit: limit,
+    });
 
-    return related.map((product: any) => {
-        const parsedImages = product.images ? JSON.parse(product.images) : [];
+    return related.map((p): Product => {
+        const { category, subcategory, ...rest } = p;
+        const parsedImages = rest.images ? JSON.parse(rest.images) : [];
         return {
-            ...product,
+            ...rest,
             images: parsedImages,
             image: parsedImages[0] || '/placeholder.svg',
+            category: category?.name || 'N/A',
+            subcategory: subcategory?.name || 'N/A',
         };
     });
 }
 
 export async function getCategoryDetails(slug: string) {
-    const s = norm(slug);
-    if (s === 'all') {
+    console.log(`[getCategoryDetails] Searching for category with slug: ${slug}`);
+    if (slug === 'all') {
         return {
             id: 'all',
             name: 'All Products',
@@ -134,21 +143,33 @@ export async function getCategoryDetails(slug: string) {
         };
     }
 
-    const categoryResult = await db.query.categories.findFirst({
-        where: eq(categories.slug, s),
-        with: {
-            subcategories: {
-                columns: { id: true, name: true, slug: true },
-            },
-        },
-    });
+    try {
+        const categoryResult = await db.query.categories.findFirst({
+            where: like(categories.slug, slug),
+            with: {
+                subcategories: {
+                    columns: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                    }
+                }
+            }
+        });
 
-    return categoryResult || null;
+        console.log(`[getCategoryDetails] Found category:`, categoryResult);
+        return categoryResult || null;
+    } catch (error) {
+        console.error(`[getCategoryDetails] Error fetching category with slug ${slug}:`, error);
+        return null;
+    }
 }
 
 export async function getReviews(options: { productId?: string; limit?: number } = {}) {
-    const conditions: any[] = [eq(reviews.isApproved, true)];
-    if (options.productId) conditions.push(eq(reviews.productId, options.productId));
+    const conditions = [eq(reviews.isApproved, true)];
+    if (options.productId) {
+        conditions.push(eq(reviews.productId, options.productId));
+    }
 
     const query = db
         .select({
@@ -168,7 +189,9 @@ export async function getReviews(options: { productId?: string; limit?: number }
         .where(and(...conditions))
         .orderBy(desc(reviews.createdAt));
 
-    if (options.limit) query.limit(options.limit);
+    if (options.limit) {
+        query.limit(options.limit);
+    }
 
     return await query;
 }
