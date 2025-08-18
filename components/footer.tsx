@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 
 interface SocialMediaSetting {
   id: string
@@ -68,11 +69,12 @@ export function Footer() {
   }
 
   const getSocialIcon = (platform: string) => {
-    switch (platform) {
-      case 'facebook': return 'f'
-      case 'instagram': return 'i'
-      case 'twitter': return 't'
-      default: return platform.charAt(0).toLowerCase()
+    switch (platform.toLowerCase()) {
+      case 'facebook': return <FaFacebookF />
+      case 'instagram': return <FaInstagram />
+      case 'twitter': return <FaTwitter />
+      case 'linkedin': return <FaLinkedinIn />
+      default: return platform.charAt(0).toUpperCase()
     }
   }
 
@@ -209,9 +211,9 @@ export function Footer() {
                   className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg cursor-pointer hover:bg-[#5BB8C1] transition-all shadow-md flex items-center justify-center"
                   title={`Follow us on ${setting.platform}`}
                 >
-                  <span className="text-white text-sm font-brandon">
+                  <div className="text-white text-lg">
                     {getSocialIcon(setting.platform)}
-                  </span>
+                  </div>
                 </a>
               ))}
             </div>
@@ -226,15 +228,15 @@ export function Footer() {
               </p>
             )}
 
-            <h4 className="font-bold mb-2 text-primary font-brandon">WE ACCEPT</h4>
-            <div className="flex space-x-2">
-              <div className="w-12 h-8 bg-[hsl(var(--primary))] rounded text-white text-xs flex items-center justify-center font-semibold shadow-md font-brandon">
-                VISA
-              </div>
-              <div className="w-12 h-8 bg-gray-700 rounded text-white text-xs flex items-center justify-center font-semibold shadow-md font-brandon">
-                MC
-              </div>
-            </div>
+            {/*<h4 className="font-bold mb-2 text-primary font-brandon">WE ACCEPT</h4>*/}
+            {/*<div className="flex space-x-2">*/}
+            {/*  <div className="w-12 h-8 bg-[hsl(var(--primary))] rounded text-white text-xs flex items-center justify-center font-semibold shadow-md font-brandon">*/}
+            {/*    VISA*/}
+            {/*  </div>*/}
+            {/*  <div className="w-12 h-8 bg-gray-700 rounded text-white text-xs flex items-center justify-center font-semibold shadow-md font-brandon">*/}
+            {/*    MC*/}
+            {/*  </div>*/}
+            {/*</div>*/}
           </div>
 
           {/* Newsletter */}
@@ -265,12 +267,12 @@ export function Footer() {
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
           <p className="font-brandon">
-            © 2025 My Amazin Store. All rights reserved.
+            © {new Date().getFullYear()} SOUTHERN FASHION & DÉCOR BD All rights reserved.
           </p>
-          <p className="mt-2 font-brandon">
-            Made with{" "}
-            <span className="text-[hsl(var(--primary))]">♥</span> in Bangladesh
-          </p>
+          {/*<p className="mt-2 font-brandon">*/}
+          {/*  Made with{" "}*!/*/}
+          {/*  <span className="text-[hsl(var(--primary))]">♥</span> in Bangladesh*/}
+          {/*</p>*/}
         </div>
       </div>
     </footer>

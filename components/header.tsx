@@ -1,6 +1,7 @@
 "use client"
 
 import { Search, User, ShoppingBag, Phone, Menu, X } from "lucide-react"
+import { FaWhatsapp as Whatsapp} from "react-icons/fa";
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -64,8 +65,8 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                     {loading ? (
                       <div className="h-16 w-56 animate-pulse rounded-md bg-white/30"></div>
                     ) : (
-                      settings && (
-                        <img src={settings.site_logo} alt={settings.site_name || 'Site Logo'} className="h-16 object-contain" />
+                      settings?.site_logo && (
+                        <img src={settings.site_logo} alt={settings.site_name || 'Site Logo'} className="h-[100px] w-[100px] object-contain" />
                       )
                     )}
                   </button>
@@ -87,8 +88,8 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                 {/* Right: Icons */}
                 <div className="flex items-center justify-end space-x-4 text-sm">
                   {settings && settings.contact_phone && (
-                    <a href={`tel:${settings.contact_phone}`} className="hidden lg:flex items-center gap-2 hover:text-gray-200">
-                      <Phone size={20} /> {settings.contact_phone}
+                    <a href={`https://wa.me/${settings.contact_phone}`} target="_blank" rel="noopener noreferrer" className="hidden lg:flex items-center gap-2 text-white hover:text-gray-200">
+                      <Whatsapp size={20} /> {settings.contact_phone}
                     </a>
                   )}
                 </div>

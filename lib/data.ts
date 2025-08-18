@@ -1,6 +1,6 @@
 import { db } from '@/lib/prisma';
 import { products, categories, subcategories, reviews } from '@/lib/db/schema';
-import { eq, and, desc, asc, not } from 'drizzle-orm';
+import { eq, and, desc, asc, not, sql } from 'drizzle-orm';
 
 export async function getProducts(options: {
     featured?: boolean;
@@ -13,6 +13,36 @@ export async function getProducts(options: {
 } = {}) {
     const conditions = [];
 
+    if (options.category && options.category !== 'all') {
+        const categoryData = await db.query.categories.findFirst({ where: eq(sql.lower(categories.slug), options.category.toLowerCase()) });
+
+        if (!categoryData) {
+            return []; // Category not found, no products to return
+        }
+
+        conditions.push(eq(products.categoryId, categoryData.id));
+
+        if (options.subcategory) {
+            const subcategoryData = await db.query.subcategories.findFirst({
+                where: and(
+                    eq(sql.lower(subcategories.slug), options.subcategory.toLowerCase()),
+                    eq(subcategories.categoryId, categoryData.id)
+                )
+            });
+
+            if (!subcategoryData) {
+                return []; // Subcategory not found for this category, no products to return
+            }
+            conditions.push(eq(products.subcategoryId, subcategoryData.id));
+        }
+    } else if (options.subcategory) {
+        const subcategoryData = await db.query.subcategories.findFirst({ where: eq(sql.lower(subcategories.slug), options.subcategory.toLowerCase()) });
+        if (!subcategoryData) {
+            return [];
+        }
+        conditions.push(eq(products.subcategoryId, subcategoryData.id));
+    }
+
     if (options.featured) {
         conditions.push(eq(products.isFeatured, true));
     }
@@ -21,20 +51,6 @@ export async function getProducts(options: {
     }
     if (options.new) {
         conditions.push(eq(products.isNew, true));
-    }
-
-    if (options.category && options.category !== 'all') {
-        const categoryData = await db.query.categories.findFirst({ where: eq(categories.slug, options.category) });
-        if (categoryData) {
-            conditions.push(eq(products.categoryId, categoryData.id));
-        }
-    }
-
-    if (options.subcategory) {
-        const subcategoryData = await db.query.subcategories.findFirst({ where: eq(subcategories.slug, options.subcategory) });
-        if (subcategoryData) {
-            conditions.push(eq(products.subcategoryId, subcategoryData.id));
-        }
     }
 
     const query = db.select().from(products).where(and(...conditions));
@@ -112,19 +128,26 @@ export async function getCategoryDetails(slug: string) {
     }
 
     const categoryResult = await db.query.categories.findFirst({
-        where: eq(categories.slug, slug),
-        with: {
-            subcategories: {
-                columns: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                }
-            }
-        }
+        where: eq(sql.lower(categories.slug), slug.toLowerCase()),
     });
 
-    return categoryResult || null;
+    if (!categoryResult) {
+        return null;
+    }
+
+    const categorySubcategories = await db
+        .select({
+            id: subcategories.id,
+            name: subcategories.name,
+            slug: subcategories.slug,
+        })
+        .from(subcategories)
+        .where(eq(subcategories.categoryId, categoryResult.id));
+
+    return {
+        ...categoryResult,
+        subcategories: categorySubcategories,
+    };
 }
 
 export async function getReviews(options: { productId?: string; limit?: number } = {}) {
