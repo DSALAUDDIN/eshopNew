@@ -65,14 +65,15 @@ export async function getProducts(options: {
 
     const data = await db.query.products.findMany(queryOptions);
 
-    return data.map(product => {
-        const parsedImages = product.images ? JSON.parse(product.images) : [];
+    return data.map(p => {
+        const { category, subcategory, ...rest } = p;
+        const parsedImages = rest.images ? JSON.parse(rest.images) : [];
         return {
-            ...product,
+            ...rest,
             images: parsedImages,
             image: parsedImages[0] || '/placeholder.svg',
-            category: product.category?.name || 'N/A',
-            subcategory: product.subcategory?.name || 'N/A',
+            category: category?.name || 'N/A',
+            subcategory: subcategory?.name || 'N/A',
         };
     });
 }
@@ -92,30 +93,39 @@ export async function getProductById(id: string) {
 
     if (!productResult) return null;
 
-    const parsedImages = productResult.images ? JSON.parse(productResult.images) : [];
+    const { category, subcategory, reviews: productReviews, ...rest } = productResult;
+    const parsedImages = rest.images ? JSON.parse(rest.images) : [];
+
     return {
-        ...productResult,
+        ...rest,
         images: parsedImages,
         image: parsedImages[0] || '/placeholder.svg',
-        category: productResult.category?.name || 'N/A',
-        subcategory: productResult.subcategory?.name || 'N/A',
+        category: category?.name || 'N/A',
+        subcategory: subcategory?.name || 'N/A',
+        reviews: productReviews,
     };
 }
 
 export async function getRelatedProducts(categoryId: string, productId: string, limit: number) {
-    const related = await db
-        .select()
-        .from(products)
-        .where(and(eq(products.categoryId, categoryId), not(eq(products.id, productId))))
-        .orderBy(desc(products.createdAt))
-        .limit(limit);
+    const related = await db.query.products.findMany({
+        where: and(eq(products.categoryId, categoryId), not(eq(products.id, productId))),
+        with: {
+            category: true,
+            subcategory: true,
+        },
+        orderBy: desc(products.createdAt),
+        limit: limit,
+    });
 
-    return related.map(product => {
-        const parsedImages = product.images ? JSON.parse(product.images) : [];
+    return related.map(p => {
+        const { category, subcategory, ...rest } = p;
+        const parsedImages = rest.images ? JSON.parse(rest.images) : [];
         return {
-            ...product,
+            ...rest,
             images: parsedImages,
             image: parsedImages[0] || '/placeholder.svg',
+            category: category?.name || 'N/A',
+            subcategory: subcategory?.name || 'N/A',
         };
     });
 }
