@@ -92,7 +92,7 @@ export function ProductGrid({ products, title, onViewDetails }: ProductGridProps
                           alt={product.name}
                           fill
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                          className="object-contain transition-transform duration-300"
+                          className="object-contain transition-transform duration-300 group-hover:scale-105"
                           priority={idx < 2} // a couple of top images get priority
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />

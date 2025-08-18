@@ -21,7 +21,7 @@ export interface Product {
 }
 
 export interface Review {
-  id: string // <-- changed to string for consistency
+  id: number
   customerName: string
   rating: number
   title?: string

@@ -1,6 +1,7 @@
-import { getProductById, getRelatedProducts, getProducts, getReviews } from "@/lib/data";
+import { getProductById, getRelatedProducts, getProducts } from "@/lib/data";
 import { ProductDetails } from "@/components/product-details";
 import { notFound } from "next/navigation";
+import { CustomerReviews } from "@/components/customer-reviews";
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
     const productId = params.id;
@@ -10,37 +11,17 @@ export default async function ProductPage({ params }: { params: { id: string } }
         notFound();
     }
 
-    const [relatedProductsRaw, bestSellingProductsRaw, reviews] = await Promise.all([
+    const [relatedProducts, bestSellingProducts] = await Promise.all([
         getRelatedProducts(product.categoryId, product.id, 8),
         getProducts({ featured: true, limit: 8 }),
-        getReviews({ productId }),
     ]);
-
-    // Map to ensure required fields for Product type
-    const mapProduct = (p: any): any => ({
-        ...p,
-        image: p.image || (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : "/placeholder.jpg"),
-        category: p.category || (p.categoryId || ""),
-        subcategory: p.subcategory || (p.subcategoryId || ""),
-    });
-
-    // Map reviews to ensure title is string | undefined
-    const mappedReviews = reviews.map((r: any) => ({
-        ...r,
-        title: r.title === null ? undefined : r.title,
-    }));
-
-    // Attach reviews to product
-    const productWithReviews = { ...mapProduct(product), reviews: mappedReviews };
-
-    const relatedProducts = relatedProductsRaw.map(mapProduct);
-    const bestSellingProducts = bestSellingProductsRaw.map(mapProduct);
 
     return (
         <ProductDetails
-            product={productWithReviews}
+            product={product}
             relatedProducts={relatedProducts}
             bestSellingProducts={bestSellingProducts}
+            reviewsComponent={<CustomerReviews productId={productId} />}
         />
     );
 }
