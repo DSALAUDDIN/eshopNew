@@ -92,28 +92,15 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </div>
           ))}
 
-          <button
-            onClick={() => handleNavigate("/sale")}
-            className="block text-orange-600 hover:text-orange-700 font-medium transition-colors w-full text-left py-2"
-          >
-            SALE
-          </button>
-          <button
-            onClick={() => handleNavigate("/help")}
-            className="block text-gray-700 hover:text-orange-600 font-medium transition-colors w-full text-left py-2"
-          >
-            HELP
-          </button>
-
           <div className="pt-4 border-t">
             <div className="flex items-center space-x-2 mt-2 text-gray-600">
-              <Whatsapp className="w-4 h-4" />
-              <span className="font-semibold">WhatsApp:</span>
+              <Whatsapp className="w-4 h-4 text-green-500 hover:text-green-600" />
+              <span className="font-semibold text-green-500 hover:text-green-600">WhatsApp:</span>
               <a
                   href={`https://wa.me/${(settingsData?.contact_phone || "+8801534207276").replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-green-600"
+                  className="text-green-500 hover:text-green-600"
               >
                 {settingsData?.contact_phone || "+8801534207276"}
               </a>
