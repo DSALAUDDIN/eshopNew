@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Phone, ChevronDown } from "lucide-react"
+import { FaWhatsapp as Whatsapp} from "react-icons/fa";
+
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
 import { useSiteSettings } from "@/lib/settings"
@@ -102,10 +104,19 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           >
             HELP
           </button>
+
           <div className="pt-4 border-t">
             <div className="flex items-center space-x-2 mt-2 text-gray-600">
-              <Phone className="w-4 h-4" />
-              <span>{settingsData?.contact_phone || "+8801534207276"}</span>
+              <Whatsapp className="w-4 h-4" />
+              <span className="font-semibold">WhatsApp:</span>
+              <a
+                  href={`https://wa.me/${(settingsData?.contact_phone || "+8801534207276").replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-green-600"
+              >
+                {settingsData?.contact_phone || "+8801534207276"}
+              </a>
             </div>
           </div>
         </nav>

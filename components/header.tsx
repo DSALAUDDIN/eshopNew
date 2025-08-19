@@ -112,6 +112,11 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           {/* === NAVIGATION SECTION === */}
           <div className="hidden md:block bg-[#6cb2da] relative">
             <nav className="container mx-auto flex justify-center items-center gap-x-8 h-[48px]">
+              <div className="py-3">
+                <button onClick={() => router.push('/')} className="text-sm font-bold tracking-wider uppercase text-white hover:text-gray-200 transition-colors">
+                  Home
+                </button>
+              </div>
                {categoriesLoading ? (
                 <div className="flex items-center justify-center gap-x-8">
                   <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
