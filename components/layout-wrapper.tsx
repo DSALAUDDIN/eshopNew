@@ -45,7 +45,11 @@ export function LayoutWrapper({ children, categories }: LayoutWrapperProps) {
 
       {/* Global Components */}
       <CartSidebar />
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+        categories={categories} 
+      />
     </div>
   )
 }

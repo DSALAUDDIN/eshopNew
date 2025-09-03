@@ -529,29 +529,29 @@ export default function AdminProducts() {
                       </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price *</Label>
-                    <Input
-                        id="price"
-                        type="number"
-                        step="0.01"
-                        value={productForm.price}
-                        onChange={(e) => setProductForm(prev => ({...prev, price: e.target.value}))}
-                        placeholder="0.00"
-                    />
-                  </div>
+                  {/*<div className="space-y-2">*/}
+                  {/*  <Label htmlFor="price">Price *</Label>*/}
+                  {/*  <Input*/}
+                  {/*      id="price"*/}
+                  {/*      type="number"*/}
+                  {/*      step="0.01"*/}
+                  {/*      value={productForm.price}*/}
+                  {/*      onChange={(e) => setProductForm(prev => ({...prev, price: e.target.value}))}*/}
+                  {/*      placeholder="0.00"*/}
+                  {/*  />*/}
+                  {/*</div>*/}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="originalPrice">Original Price</Label>
-                    <Input
-                        id="originalPrice"
-                        type="number"
-                        step="0.01"
-                        value={productForm.originalPrice}
-                        onChange={(e) => setProductForm(prev => ({...prev, originalPrice: e.target.value}))}
-                        placeholder="0.00"
-                    />
-                  </div>
+                  {/*<div className="space-y-2">*/}
+                  {/*  <Label htmlFor="originalPrice">Original Price</Label>*/}
+                  {/*  <Input*/}
+                  {/*      id="originalPrice"*/}
+                  {/*      type="number"*/}
+                  {/*      step="0.01"*/}
+                  {/*      value={productForm.originalPrice}*/}
+                  {/*      onChange={(e) => setProductForm(prev => ({...prev, originalPrice: e.target.value}))}*/}
+                  {/*      placeholder="0.00"*/}
+                  {/*  />*/}
+                  {/*</div>*/}
 
                   <div className="space-y-2">
                     <Label htmlFor="stockQuantity">Stock Quantity *</Label>

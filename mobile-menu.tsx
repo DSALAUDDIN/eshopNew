@@ -5,26 +5,19 @@ import { Phone, ChevronDown } from "lucide-react"
 import { FaWhatsapp as Whatsapp} from "react-icons/fa";
 
 import { useRouter } from "next/navigation"
-import { useStore } from "@/lib/store"
 import { useSiteSettings } from "@/lib/settings"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 interface MobileMenuProps {
   isOpen: boolean
   onClose: () => void
+  categories: any[]
 }
 
-export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+export function MobileMenu({ isOpen, onClose, categories = [] }: MobileMenuProps) {
   const router = useRouter()
-  const { categories, fetchCategories } = useStore()
   const { settings } = useSiteSettings()
   const [openCategory, setOpenCategory] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchCategories()
-    }
-  }, [isOpen, fetchCategories])
 
   const handleNavigate = (path: string) => {
     router.push(path)
