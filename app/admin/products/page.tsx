@@ -169,8 +169,11 @@ export default function AdminProducts() {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('API Response:', data) // Debug log
+        console.log('Pagination data:', data.pagination) // Debug log
         setProducts(data.products)
-        setTotalPages(data.pagination.pages)
+        setTotalPages(data.pagination.totalPages)
+        console.log('Setting totalPages to:', data.pagination.totalPages) // Debug log
       }
     } catch (error) {
       console.error('Error fetching products:', error)
@@ -794,7 +797,6 @@ export default function AdminProducts() {
                               </div>
                             </TableCell>
                             <TableCell>{product.category?.name}</TableCell>
-                            {/* Price and Stock Quantity columns removed as per instruction */}
                             <TableCell>
                               <div className="flex gap-1">
                                 {product.isActive && <Badge variant="secondary">Active</Badge>}
@@ -827,28 +829,31 @@ export default function AdminProducts() {
                 </div>
             )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
-                  <Button
-                      variant="outline"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(prev => prev - 1)}
-                  >
-                    Previous
-                  </Button>
-                  <span className="px-4 py-2">
-                Page {currentPage} of {totalPages}
-              </span>
-                  <Button
-                      variant="outline"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage(prev => prev + 1)}
-                  >
-                    Next
-                  </Button>
-                </div>
-            )}
+            {/* Pagination Controls */}
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0' }}>
+              <Button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+              >
+                Previous
+              </Button>
+              {[...Array(totalPages)].map((_, idx) => (
+                <Button
+                  key={idx + 1}
+                  variant={currentPage === idx + 1 ? 'default' : 'outline'}
+                  onClick={() => setCurrentPage(idx + 1)}
+                  style={{ margin: '0 4px' }}
+                >
+                  {idx + 1}
+                </Button>
+              ))}
+              <Button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                Next
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
