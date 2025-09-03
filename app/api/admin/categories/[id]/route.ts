@@ -4,6 +4,7 @@ import Database from 'better-sqlite3'
 import { users, categories, subcategories, products } from '@/lib/db/schema'
 import { eq, count } from 'drizzle-orm'
 import { verifyToken, getTokenFromRequest } from '@/lib/auth'
+import { revalidatePath } from 'next/cache'
 
 const sqlite = new Database('./prisma/dev.db')
 const db = drizzle(sqlite)
@@ -139,6 +140,11 @@ export async function PUT(
       .where(eq(categories.id, params.id))
       .returning()
 
+    revalidatePath('/')
+    revalidatePath('/categories')
+    revalidatePath('/admin/categories')
+    revalidatePath(`/categories/${slug}`)
+
     return NextResponse.json(updatedCategory[0])
   } catch (error) {
     console.error('Error updating category:', error)
@@ -184,6 +190,11 @@ export async function DELETE(
     await db
       .delete(categories)
       .where(eq(categories.id, params.id))
+
+    revalidatePath('/')
+    revalidatePath('/categories')
+    revalidatePath('/admin/categories')
+    revalidatePath(`/categories/${existingCategory[0].slug}`)
 
     return NextResponse.json({ message: 'Category deleted successfully' })
   } catch (error) {

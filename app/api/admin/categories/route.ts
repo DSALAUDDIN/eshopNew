@@ -4,6 +4,7 @@ import Database from 'better-sqlite3'
 import { users, categories, subcategories, products } from '@/lib/db/schema'
 import { verifyToken, getTokenFromRequest } from '@/lib/auth'
 import { eq, and, count } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 
 const sqlite = new Database('./prisma/dev.db')
 const db = drizzle(sqlite)
@@ -122,6 +123,10 @@ export async function POST(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : true
       })
       .returning()
+
+    revalidatePath('/')
+    revalidatePath('/categories')
+    revalidatePath('/admin/categories')
 
     return NextResponse.json(newCategory[0], { status: 201 })
   } catch (error) {
