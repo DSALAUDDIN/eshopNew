@@ -1025,10 +1025,12 @@ export default function AdminSettings() {
                                     {category.subcategories.length} subcategories
                                   </Badge>
                                   <div className="space-y-1">
-                                    {category.subcategories.slice(0, 3).map((sub: any) => (
-                                      <div key={sub.id} className="flex items-center justify-between text-xs bg-gray-50 rounded px-2 py-1">
+                                    {category.subcategories.map((sub: any) => (
+                                      <div
+                                        key={sub.id}
+                                        className="flex items-center justify-between text-xs bg-gray-50 rounded px-2 py-1"
+                                      >
                                         <span className="flex items-center gap-2">
-                                          {/* Subcategory Image */}
                                           {sub.image ? (
                                             <img
                                               src={sub.image}
@@ -1063,11 +1065,6 @@ export default function AdminSettings() {
                                         </div>
                                       </div>
                                     ))}
-                                    {category.subcategories.length > 3 && (
-                                      <p className="text-xs text-gray-500">
-                                        +{category.subcategories.length - 3} more
-                                      </p>
-                                    )}
                                   </div>
                                 </>
                               ) : (

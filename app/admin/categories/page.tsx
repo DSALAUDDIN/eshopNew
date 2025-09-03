@@ -57,6 +57,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [subSearchTerm, setSubSearchTerm] = useState('')
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
@@ -262,6 +263,21 @@ export default function AdminCategories() {
     setViewMode('categories')
     setSelectedCategory(null)
   }
+
+  const allSubcategories = categories
+    .flatMap(category =>
+      (category.subcategories || []).map(subcategory => ({
+        ...subcategory,
+        parentCategoryName: category.name,
+      }))
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const filteredSubcategories = allSubcategories.filter(
+    sub =>
+      sub.name.toLowerCase().includes(subSearchTerm.toLowerCase()) ||
+      sub.parentCategoryName.toLowerCase().includes(subSearchTerm.toLowerCase())
+  );
 
   const renderSubcategoriesView = () => {
     if (!selectedCategory) return null
@@ -620,6 +636,86 @@ export default function AdminCategories() {
                     </TableBody>
                   </Table>
                 </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>All Subcategories ({filteredSubcategories.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search by subcategory or parent category..."
+                value={subSearchTerm}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setSubSearchTerm(e.target.value)
+                }
+                className="pl-10"
+              />
+            </div>
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Subcategory Name</TableHead>
+                      <TableHead>Parent Category</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSubcategories.length > 0 ? (
+                      filteredSubcategories.map(sub => (
+                        <TableRow key={sub.id}>
+                          <TableCell>
+                            <div className="font-medium">{sub.name}</div>
+                            <div className="text-sm text-gray-500">Slug: {sub.slug}</div>
+                          </TableCell>
+                          <TableCell>{sub.parentCategoryName}</TableCell>
+                          <TableCell>
+                            <Badge variant={sub.isActive ? 'default' : 'secondary'}>
+                              {sub.isActive ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                // onClick={() => openEditSubcategoryModal(sub)} // Note: Edit functionality not implemented in this view
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                // onClick={() => handleDeleteSubcategory(sub.id)} // Note: Delete functionality not implemented in this view
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <FolderTree className="h-12 w-12 text-gray-400" />
+                            <p className="text-gray-500">No subcategories found.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

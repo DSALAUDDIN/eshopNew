@@ -51,30 +51,41 @@ export async function GET(request: NextRequest) {
     })
     .from(categories)
 
-    // Get subcategories and product counts for each category
-    const categoriesWithDetails = await Promise.all(
-      categoriesData.map(async (category) => {
-        // Get subcategories for this category
-        const subcategoryData = await db
-          .select()
-          .from(subcategories)
-          .where(eq(subcategories.categoryId, category.id))
+    // Get all subcategories at once to avoid N+1 queries
+    const allSubcategories = await db.select().from(subcategories);
 
-        // Get product count for this category
-        const productCountResult = await db
-          .select({ count: count() })
-          .from(products)
-          .where(eq(products.categoryId, category.id))
-
-        return {
-          ...category,
-          subcategories: subcategoryData,
-          _count: {
-            products: productCountResult[0]?.count || 0
-          }
-        }
+    // Get all product counts at once
+    const productCounts = await db.select({ 
+        categoryId: products.categoryId, 
+        count: count(products.id) 
       })
-    )
+      .from(products)
+      .groupBy(products.categoryId);
+
+    // Create maps for efficient lookup
+    const subcategoriesMap = allSubcategories.reduce((acc, sub) => {
+      if (!acc[sub.categoryId]) {
+        acc[sub.categoryId] = [];
+      }
+      acc[sub.categoryId].push(sub);
+      return acc;
+    }, {} as Record<string, typeof allSubcategories>);
+
+    const productCountMap = productCounts.reduce((acc, pc) => {
+        if(pc.categoryId) {
+            acc[pc.categoryId] = pc.count;
+        }
+        return acc;
+    }, {} as Record<string, number>);
+
+    // Combine the data
+    const categoriesWithDetails = categoriesData.map(category => ({
+      ...category,
+      subcategories: subcategoriesMap[category.id] || [],
+      _count: {
+        products: productCountMap[category.id] || 0
+      }
+    }));
 
     return NextResponse.json(categoriesWithDetails)
   } catch (error) {
