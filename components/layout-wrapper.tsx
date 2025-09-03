@@ -11,9 +11,10 @@ import { MobileMenu } from "@/mobile-menu"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
+  categories: any[]
 }
 
-export function LayoutWrapper({ children }: LayoutWrapperProps) {
+export function LayoutWrapper({ children, categories }: LayoutWrapperProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
@@ -24,6 +25,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
         <Header
           isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
+          categories={categories}
         />
 
         {/* Navigation - only show on md and up */}

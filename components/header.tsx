@@ -12,33 +12,15 @@ import { motion, AnimatePresence } from "framer-motion"
 interface HeaderProps {
   isMobileMenuOpen: boolean
   setIsMobileMenuOpen: (open: boolean) => void
+  categories: any[]
 }
 
-export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
+export function Header({ isMobileMenuOpen, setIsMobileMenuOpen, categories = [] }: HeaderProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const { settings, loading } = useSiteSettings()
 
   const [activeMenu, setActiveMenu] = useState<any | null>(null)
-  const [categories, setCategories] = useState<any[]>([])
-  const [categoriesLoading, setCategoriesLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setCategoriesLoading(true)
-      try {
-        const response = await fetch("/api/categories")
-        if (!response.ok) throw new Error("Network response was not ok")
-        const data = await response.json()
-        setCategories(data)
-      } catch (error) {
-        console.error("Failed to fetch categories:", error)
-      } finally {
-        setCategoriesLoading(false)
-      }
-    }
-    fetchCategories()
-  }, [])
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -117,22 +99,13 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                   Home
                 </button>
               </div>
-               {categoriesLoading ? (
-                <div className="flex items-center justify-center gap-x-8">
-                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
-                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
-                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
-                  <div className="h-5 w-24 animate-pulse rounded-md bg-white/30"></div>
-                </div>
-              ) : (
-                categories.map((cat: any) => (
+               {categories.map((cat: any) => (
                     <div key={cat.id} className="py-3" onMouseEnter={() => setActiveMenu(cat)}>
                       <button onClick={() => router.push(`/category/${cat.slug}`)} className="text-sm font-bold tracking-wider uppercase text-white hover:text-gray-200 transition-colors">
                         {cat.name}
                       </button>
                     </div>
-                ))
-              )}
+                ))}
             </nav>
             
             {/* MEGA MENU CONTAINER */}
